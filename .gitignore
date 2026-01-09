@@ -40,6 +40,10 @@ notebooklm/capcut/
 notebooklm/recording/
 notebooklm/output/
 
+# NotebookLM scripts and checklists (private)
+notebooklm/NotebookLM录屏执行Checklist.md
+notebooklm/NotebookLM视频脚本.md
+
 # NotebookLM binary files (backup patterns)
 notebooklm/**/*.mp4
 notebooklm/**/*.mov
