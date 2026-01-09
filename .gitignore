@@ -1,0 +1,63 @@
+# Software binaries and large files
+software/*.dmg
+software/*.iso
+software/*.exe
+software/*.zip
+software/*.tar.gz
+software/*.app
+software/*.pkg
+
+# Video files
+software/*.mp4
+software/*.mov
+software/*.avi
+software/*.mkv
+software/*.flv
+software/*.wmv
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+# Tutorial videos and large media
+software/ScreenFlow教程/*
+!software/ScreenFlow教程/README.md
+
+# Only track README files in software folder
+software/*
+!software/README.md
+!software/.gitkeep
+
+# NotebookLM video production directories
+notebooklm/downloads/
+notebooklm/aigc/
+notebooklm/sample/
+notebooklm/capcut/
+notebooklm/recording/
+notebooklm/output/
+
+# NotebookLM binary files (backup patterns)
+notebooklm/**/*.mp4
+notebooklm/**/*.mov
+notebooklm/**/*.avi
+notebooklm/**/*.mkv
+notebooklm/**/*.flv
+notebooklm/**/*.wmv
+notebooklm/**/*.mp3
+notebooklm/**/*.MP3
+notebooklm/**/*.wav
+notebooklm/**/*.WAV
+notebooklm/**/*.m4a
+notebooklm/**/*.aac
+notebooklm/**/*.screenflow/
+notebooklm/**/*.jpg
+notebooklm/**/*.jpeg
+notebooklm/**/*.png
+notebooklm/**/*.gif
+notebooklm/**/*.dat
+notebooklm/**/*.scc
+notebooklm/**/*.plist
