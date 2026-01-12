@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat:*)",
+      "Bash(git add:*)",
+      "Bash(nslookup:*)",
+      "Bash(dig:*)",
+      "Bash(whois:*)",
+      "Bash(ping:*)",
+      "Bash(curl:*)",
+      "Bash(python3:*)",
+      "Bash(rm:*)",
+      "Bash(chmod:*)",
+      "Bash(tree:*)",
+      "Bash(git branch:*)",
+      "Bash(git commit:*)",
+      "Bash(gh repo create:*)",
+      "Bash(git push)",
+      "Bash(git rm:*)",
+      "Bash(gh repo edit:*)",
+      "Bash(gh repo view:*)",
+      "Bash(git push:*)",
+      "Bash(pdfinfo:*)",
+      "Bash(convert:*)",
+      "Bash(magick:*)"
+    ]
+  }
+}
