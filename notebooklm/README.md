@@ -16,9 +16,19 @@
 
 ### 第一期：NotebookLM 完整工作流演示 - Claude Skills 知识库构建
 
-**视频链接**
+**发布平台**
+
+*长视频（16:9 横屏）*
 - 🇨🇳 **Bilibili**: [https://www.bilibili.com/video/BV1jc6mBbEcx](https://www.bilibili.com/video/BV1jc6mBbEcx)
 - 🌍 **YouTube**: [https://www.youtube.com/watch?v=ubQCKiGLvYI](https://www.youtube.com/watch?v=ubQCKiGLvYI)
+
+*短视频（9:16 竖屏）*
+- 📱 **抖音**: 教学视频已发布
+- 📱 **小红书**: 视频 + 图文内容已发布
+- 📱 **微信公众号**: 视频已发布
+
+*图文内容*
+- 📱 **小红书**: 使用 NotebookLM 提示词生成的图文内容
 
 **视频主题**
 通过实战演示如何使用 NotebookLM 构建个人知识库，以 Claude Skills 为例，展示从零开始的完整 C.O.D.E 工作流：
@@ -46,6 +56,9 @@ notebooklm/
 ├── downloads/       # 源材料（PDF、视频、音频等）
 ├── recording/       # ScreenFlow 录制项目文件
 ├── output/         # 最终输出的视频文件
+│   └── rednote/    # 小红书相关输出
+│       ├── Claude_Skills_才是王道.pdf
+│       └── pages/  # PDF 转换的 PNG 图片（6 页）
 ├── capcut/         # 剪映项目文件
 ├── aigc/           # AI 生成的内容素材
 ├── artifact/       # NotebookLM 生成的产出物
@@ -127,10 +140,27 @@ notebooklm/
 6. 导出最终视频 → `output/`
 7. 提取字幕 → `transript/`
 
-### 5. 发布优化
-- 根据平台特性优化标题和封面
-- 多平台同步发布（Bilibili、YouTube、小红书）
-- 社区互动和反馈收集
+### 5. 发布优化与多平台分发
+
+**视频格式适配**：
+- 📺 **16:9 横屏**：适合 Bilibili、YouTube 等长视频平台
+- 📱 **9:16 竖屏**：适合抖音、小红书、微信视频号等短视频平台
+
+**内容形式矩阵**：
+- 🎥 **视频内容**：长视频（教学详解）+ 短视频（快速传播）
+- 📝 **图文内容**：小红书图文（3:4 竖版，使用 NotebookLM 提示词生成）
+- 📄 **文档内容**：演示文稿、学习笔记
+
+**发布平台策略**：
+- **长视频平台**：Bilibili（技术社区）、YouTube（国际观众）
+- **短视频平台**：抖音（大众传播）、小红书（图文+视频）
+- **私域平台**：微信公众号（深度内容）
+
+**发布优化要点**：
+- 根据平台特性优化标题、封面和内容结构
+- 小红书采用"反共识"标题吸引注意力
+- 统一发布时间，形成内容矩阵效应
+- 及时回复评论，建立社区互动
 
 ## 🛠️ 使用工具
 
@@ -279,6 +309,11 @@ notebooklm/
 - ✅ 添加 `transript/` 目录，包含完整视频字幕
 - ✅ 更新 README 文档，补充详细的工作流程说明
 - ✅ 添加 NotebookLM 核心价值和使用技巧章节
+- ✅ 将小红书 PDF 转换为 PNG 图片（6 页）→ `output/rednote/pages/`
+- ✅ 多平台内容发布完成
+  - **9:16 竖屏视频**: 转换并发布到抖音、小红书、微信公众号
+  - **小红书图文**: 使用 NotebookLM 自定义提示词生成内容
+  - 验证了完整的 C.O.D.E 工作流从创作到多平台分发的闭环
 
 ### 2026-01-11
 - ✅ 第一期视频发布
