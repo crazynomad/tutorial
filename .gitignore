@@ -32,19 +32,29 @@ software/*
 !software/README.md
 !software/.gitkeep
 
-# NotebookLM video production directories
+# Tutorial Episode video production directories (applies to notebooklm/, 02-podcast-downloader/, 03-*, etc.)
+# Production directories
 notebooklm/downloads/
 notebooklm/aigc/
 notebooklm/sample/
 notebooklm/capcut/
 notebooklm/recording/
 notebooklm/output/
+[0-9][0-9]-*/downloads/
+[0-9][0-9]-*/aigc/
+[0-9][0-9]-*/sample/
+[0-9][0-9]-*/capcut/
+[0-9][0-9]-*/recording/
+[0-9][0-9]-*/output/
 
-# NotebookLM scripts and checklists (private)
+# Scripts and checklists (private)
 notebooklm/NotebookLM录屏执行Checklist.md
 notebooklm/NotebookLM视频脚本.md
+[0-9][0-9]-*/**/*Checklist.md
+[0-9][0-9]-*/**/*checklist.md
+[0-9][0-9]-*/**/*脚本.md
 
-# NotebookLM binary files (backup patterns)
+# Binary files - all episodes (notebooklm + numbered episodes)
 notebooklm/**/*.mp4
 notebooklm/**/*.mov
 notebooklm/**/*.avi
@@ -65,3 +75,23 @@ notebooklm/**/*.gif
 notebooklm/**/*.dat
 notebooklm/**/*.scc
 notebooklm/**/*.plist
+[0-9][0-9]-*/**/*.mp4
+[0-9][0-9]-*/**/*.mov
+[0-9][0-9]-*/**/*.avi
+[0-9][0-9]-*/**/*.mkv
+[0-9][0-9]-*/**/*.flv
+[0-9][0-9]-*/**/*.wmv
+[0-9][0-9]-*/**/*.mp3
+[0-9][0-9]-*/**/*.MP3
+[0-9][0-9]-*/**/*.wav
+[0-9][0-9]-*/**/*.WAV
+[0-9][0-9]-*/**/*.m4a
+[0-9][0-9]-*/**/*.aac
+[0-9][0-9]-*/**/*.screenflow/
+[0-9][0-9]-*/**/*.jpg
+[0-9][0-9]-*/**/*.jpeg
+[0-9][0-9]-*/**/*.png
+[0-9][0-9]-*/**/*.gif
+[0-9][0-9]-*/**/*.dat
+[0-9][0-9]-*/**/*.scc
+[0-9][0-9]-*/**/*.plist
