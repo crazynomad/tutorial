@@ -21,8 +21,13 @@
 ├── output/                         # 最终输出的视频文件
 ├── capcut/                         # 剪映项目文件
 ├── aigc/                          # AI 生成的内容素材
-├── artifact/                      # 产出物和工具
-│   └── podcast-downloader-v2-skill/  # 播客下载 Skill v2.0
+├── artifact/                      # 打包的产出物
+│   └── podcast-downloader-v2-skill.tar.gz  # Skill 打包文件（用于分发）
+├── skills/                        # Skills 源代码
+│   └── podcast-downloader/       # 播客下载 Skill v2.0 源码
+│       ├── SKILL.md              # 主文档
+│       ├── scripts/              # 核心脚本
+│       └── references/           # 参考文档
 ├── transript/                     # 视频字幕文件
 ├── sample/                        # 示例文件和模板
 ├── prompt/                        # NotebookLM 提示词
@@ -101,8 +106,9 @@ python scripts/download_podcast.py "https://podcasts.apple.com/cn/podcast/id1711
 ## 📝 相关资源
 
 - [Claude Skills 官方文档](https://docs.anthropic.com/en/docs/build-with-claude/claude-skills)
-- [第一期视频 - NotebookLM 完整工作流](../01-notebooklm/)
-- [Podcast Downloader Skill v2.0](artifact/podcast-downloader-v2-skill/) - 实际开发的 Skill
+- [第一期视频 - NotebookLM 完整工作流](../notebooklm/)
+- [Podcast Downloader Skill v2.0 源码](skills/podcast-downloader/) - 实际开发的 Skill
+- [Podcast Downloader Skill v2.0 打包文件](artifact/podcast-downloader-v2-skill.tar.gz) - 用于导入 claude.ai
 
 ## 🔗 发布平台
 
@@ -111,5 +117,5 @@ python scripts/download_podcast.py "https://podcasts.apple.com/cn/podcast/id1711
 ---
 
 **创建日期**: 2026-01-13
-**最后更新**: 2026-01-13
-**状态**: 🔧 开发中（Skill v2.0 已完成）
+**最后更新**: 2026-01-14
+**状态**: 🔧 开发中（Skill v2.0 已完成，已提交到 Git）
