@@ -1,4 +1,4 @@
-# NotebookLM 视频制作项目
+# 2026年的 NotebookLM🔥 也太强了！10分钟速通 Claude Skills
 
 本项目记录了使用 NotebookLM 制作 AI 知识分享视频的完整工作流程。
 
