@@ -17,21 +17,70 @@
 
 ```
 tutorial/
-├── software/              # 软件资源目录
-│   ├── README.md         # 软件说明文档
-│   └── ScreenFlow教程/    # ScreenFlow 教程资源
+├── notebooklm/                    # 第一期：NotebookLM 完整工作流教程
+│   ├── downloads/                 # 源材料
+│   ├── recording/                 # ScreenFlow 录制文件
+│   ├── output/                    # 最终视频输出
+│   ├── artifact/                  # NotebookLM 生成的产出物
+│   ├── transript/                 # 视频字幕
+│   ├── prompt/                    # 提示词模板
+│   │   ├── 5w1h.md               # 5W1H 分析法
+│   │   └── rednote.md            # 小红书内容生成
+│   └── README.md                  # 第一期教程文档
 │
-├── notebooklm/           # NotebookLM 相关资源
-│   ├── prompt/           # 提示词模板
-│   │   ├── 5w1h.md      # 5W1H 分析法提示词
-│   │   └── rednote.md   # 小红书内容生成提示词
-│   └── .claude/          # Claude 技能和工具
-│       └── skills/       # 自定义 Claude 技能
+├── 02-podcast-downloader/         # 第二期：Claude Skills 播客下载工具
+│   ├── downloads/                 # 源材料
+│   ├── recording/                 # ScreenFlow 录制文件
+│   ├── output/                    # 最终视频输出
+│   ├── artifact/                  # NotebookLM 生成的产出物
+│   ├── skills/                    # Claude Skills 代码
+│   ├── prompt/                    # 提示词模板
+│   └── README.md                  # 第二期教程文档
 │
-└── README.md             # 本文档
+├── software/                      # 软件资源目录
+│   ├── README.md                 # 软件说明文档
+│   └── ScreenFlow教程/            # ScreenFlow 教程资源
+│
+└── README.md                      # 本文档
 ```
 
 ## 🛠️ 资源分类
+
+### 🎥 视频教程系列
+
+#### 第一期：NotebookLM 完整工作流 (notebooklm/)
+
+**主题**：2026年的 NotebookLM🔥 也太强了！10分钟速通 Claude Skills
+
+**内容**：
+- 完整的 C.O.D.E 工作流演示（收集→整理→消化→表达）
+- 5W1H 结构化信息图生成
+- NotebookLM 多形式内容输出（演示文稿、播客、图文）
+- 多平台发布策略（Bilibili、YouTube、抖音、小红书、微信）
+
+**资源**：
+- 📝 提示词模板：5W1H 分析法、小红书内容生成
+- 🎨 NotebookLM 产出物：演示文稿、信息图、图文内容
+- 📹 完整视频字幕
+
+详细信息请查看 [notebooklm/README.md](./notebooklm/README.md)
+
+#### 第二期：Claude Skills 播客下载工具 (02-podcast-downloader/)
+
+**主题**：Claude Skills 实战 - 从零构建播客下载工具
+
+**内容**（筹备中）：
+- Claude Skills 核心概念和工作原理
+- Skills vs MCP 的优势对比
+- 实战开发播客下载 Skill
+- Skills 集成与最佳实践
+
+**资源**：
+- 💻 Claude Skills 完整代码
+- 📝 NotebookLM 学习指南
+- 🎨 教学演示文稿
+
+详细信息请查看 [02-podcast-downloader/README.md](./02-podcast-downloader/README.md)
 
 ### 软件工具 (software/)
 
@@ -42,17 +91,6 @@ tutorial/
 
 详细信息请查看 [software/README.md](./software/README.md)
 
-### NotebookLM 资源 (notebooklm/)
-
-NotebookLM 视频制作相关的资源和工具：
-
-#### Prompt 模板 (notebooklm/prompt/)
-- **5w1h.md** - 使用 5W1H 方法分析和组织内容
-- **rednote.md** - 小红书风格内容生成提示词
-
-#### Claude 技能 (notebooklm/.claude/skills/)
-- **podcast-downloader** - 播客下载和管理工具
-
 ## 🎯 使用说明
 
 ### 克隆仓库
@@ -62,10 +100,15 @@ git clone https://github.com/crazynomad/tutorial.git
 cd tutorial
 ```
 
-### 查看软件资源
+### 查看教程资源
 
 ```bash
-cd software
+# 第一期：NotebookLM 工作流
+cd notebooklm
+cat README.md
+
+# 第二期：Claude Skills 播客下载
+cd 02-podcast-downloader
 cat README.md
 ```
 
@@ -76,6 +119,13 @@ cd notebooklm/prompt
 # 查看提示词模板
 cat 5w1h.md
 cat rednote.md
+```
+
+### 查看软件资源
+
+```bash
+cd software
+cat README.md
 ```
 
 ## 📝 关于隐私保护
@@ -122,4 +172,4 @@ cat rednote.md
 
 **持续更新中...** 🚀
 
-*最后更新: 2025-01-09*
+*最后更新: 2026-01-13*
