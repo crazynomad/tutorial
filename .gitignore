@@ -23,6 +23,9 @@ software/*.wmv
 # Thumbnails
 ._*
 
+# Claude Code local settings
+.claude/
+
 # Tutorial videos and large media
 software/ScreenFlow教程/*
 !software/ScreenFlow教程/README.md
