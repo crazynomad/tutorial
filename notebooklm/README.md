@@ -12,6 +12,53 @@
 
 > "2026 年，重要的不是使用通用 AI 工具，而是找到合手的工具去做信息的筛选、组织和内化。NotebookLM 不只是个总结工具，它更像一个脚手架，帮你把散乱的材料先撑起来。" —— 视频总结
 
+---
+
+## 🎁 资源获取（视频观看者专享）
+
+如果你是从视频来的，这里提供了教程中使用的所有提示词和 NotebookLM 生成的内容，可以直接下载使用！
+
+### 📝 提示词模板
+
+**5W1H 结构化分析提示词**
+- 📄 [prompt/5w1h.md](prompt/5w1h.md)
+- 用途：让 NotebookLM 生成结构化信息图
+- 效果：将复杂概念拆解为 What、Why、Who、When、Where、How 六个维度
+
+**小红书图文创作提示词**
+- 📄 [prompt/rednote.md](prompt/rednote.md)
+- 用途：让 NotebookLM 生成小红书风格的图文内容
+- 效果：生成符合小红书调性的标题、内容和排版（3:4 竖版）
+
+### 🎨 NotebookLM 生成的产出物
+
+**专业演示文稿**
+- 📊 [artifact/演示文稿-ClaudeSkills_构建专业知识新范式.pdf](artifact/演示文稿-ClaudeSkills_构建专业知识新范式.pdf)
+- 内容：Claude Skills 完整知识体系（技术分享格式）
+
+**小红书图文内容**
+- 📱 [artifact/演示文稿-小红书图文.pdf](artifact/演示文稿-小红书图文.pdf)
+- 📸 PNG 图片版本：[output/rednote/pages/](output/rednote/pages/)（6 张高清图片，300 DPI）
+- 内容：适合社交媒体传播的图文内容
+
+**5W1H 结构化信息图**
+- 🗺️ [artifact/信息图-Claude Skills 概念拆解(5W1H)版本.png](artifact/信息图-Claude%20Skills%20概念拆解(5W1H)版本.png)
+- 内容：使用 5W1H 框架生成的可视化知识地图
+
+### 📹 完整视频字幕
+
+- 📝 [transript/视频字幕.txt](transript/视频字幕.txt)
+- 内容：完整的视频讲解文字稿（450 行）
+
+### 💡 使用建议
+
+1. **复制提示词**：直接复制 prompt 目录中的提示词到 NotebookLM
+2. **参考输出**：查看 artifact 目录中的示例，了解预期效果
+3. **自定义调整**：根据你的主题修改提示词中的具体内容
+4. **迭代优化**：根据输出结果不断调整提示词，获得更好的效果
+
+---
+
 ## 📺 已发布视频
 
 ### 第一期：NotebookLM 完整工作流演示 - Claude Skills 知识库构建
