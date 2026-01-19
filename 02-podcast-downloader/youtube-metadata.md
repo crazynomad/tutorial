@@ -1,11 +1,10 @@
 # Episode 2 - YouTube 元数据
 
-## 推荐标题
+## 标题
 
-**首选：**
-> Vibe Coding 实战｜两句话让 Claude 写 Skills，翻车后用 AI 组合拳救场
+> 手搓 Skills 翻车？靠 NotebookLM + Gemini 三回合 Vibe Coding 通关播客下载挑战！
 
-**备选：**
+**曾考虑的备选：**
 - 两句话让 Claude 写代码？Vibe Coding 极限挑战！
 - 挑战：用 AI 徒手搓一个播客下载工具
 - Vibe Coding 实战：AI 组合拳解决真实问题
@@ -19,16 +18,15 @@
 
 ## 简介
 
-本期是一场 Vibe Coding 的极限挑战 🎯
+本期是一场 Vibe Coding 的通关挑战 🎯
 
 想把高质量播客喂给 NotebookLM，却发现音频文件导不出来？
-我们决定用 AI 徒手搓一个播客下载工具。
+我们决定用 AI 手搓一个播客下载工具。
 
-你将看到：
-✅ 两句大白话让 Claude 生成 Skills（然后翻车）
-✅ Google 被埋没的低门槛编程神器：Gemini Canvas + Colab
-✅ NotebookLM 化身考古专家，从 Apple 古早文档挖出关键线索
-✅ AI 组合拳如何解决真实世界的问题
+三回合 AI 组合拳：
+🥊 Round 1：Claude 手搓 Skills → 翻车
+🥊 Round 2：Gemini Canvas + Colab 救场 → 继续翻车
+🥊 Round 3：NotebookLM 考古 Apple 文档 → 通关！
 
 编程的高墙正在崩塌。你不需要懂语法，也不需要背函数，
 只需要知道自己要去哪儿，AI 就会帮你铺桥架路。
