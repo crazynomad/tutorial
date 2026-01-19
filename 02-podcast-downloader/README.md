@@ -15,17 +15,16 @@
 
 ```
 02-podcast-downloader/
-├── downloads/       # 源材料（文档、参考资料等）
-├── recording/       # ScreenFlow 录制项目文件
-├── output/          # 最终输出的视频文件
-├── capcut/          # 剪映项目文件
-├── aigc/            # AI 生成的内容素材
-├── artifact/        # NotebookLM 生成的产出物（演示文稿、图文等）
-├── transript/       # 视频字幕文件
-├── sample/          # 示例文件和模板
-├── prompt/          # NotebookLM 提示词
-├── skills/          # Claude Skills 代码和配置
-└── README.md        # 本文件
+├── artifact/                      # 打包的产出物
+│   └── podcast-downloader-v2-skill.tar.gz  # Skill 打包文件（用于分发）
+├── skills/                        # Skills 源代码
+│   └── podcast-downloader/       # 播客下载 Skill v2.0 源码
+│       ├── SKILL.md              # 主文档
+│       ├── scripts/              # 核心脚本
+│       └── references/           # 参考文档
+├── transript/                     # 视频字幕文件
+├── prompt/                        # NotebookLM 提示词
+└── README.md                      # 本文件
 ```
 
 ## 💡 内容规划
@@ -35,11 +34,18 @@
 - Skills vs MCP 的区别
 - Skills 的应用场景
 
-### 2. 播客下载 Skill 开发
-- 需求分析：为什么需要播客下载工具
-- Skill 设计：目录结构、配置文件、核心功能
-- 代码实现：Apple Podcasts API 集成、下载逻辑
-- 测试验证：实际下载播客并验证功能
+### 2. 播客下载 Skill 开发（v2.0 已完成）
+- ✅ 需求分析：解决 Apple Podcasts 播客下载和元数据保存需求
+- ✅ Skill 设计：基于 iTunes API 的增强版架构
+  - 智能地区检测（cn/us/jp 等）
+  - 多重回退机制（API → 列表搜索 → RSS）
+  - 丰富的元数据保存
+- ✅ 核心功能实现：
+  - iTunes API 优先（3-5x 速度提升）
+  - 支持单集下载、批量下载（最新 N 集）
+  - 自动解析 Apple Podcasts URL
+  - 实时进度显示
+- ✅ 实战测试：成功下载「独树不成林」播客多集
 
 ### 3. Skills 集成与使用
 - 如何将 Skill 加载到 Claude Code
@@ -53,18 +59,49 @@
 
 ## 🎬 制作进度
 
-- [ ] 内容准备：收集 Claude Skills 官方文档和示例
+- [x] 内容准备：收集 Claude Skills 官方文档和示例
+- [x] Skill 开发：完成播客下载工具 v2.0（iTunes API 增强版）
+- [x] 功能测试：实际下载和验证播客功能
 - [ ] NotebookLM 处理：生成学习指南和演示文稿
-- [ ] Skill 开发：完成播客下载工具的代码
 - [ ] 视频录制：录制完整的操作演示
 - [ ] 后期制作：剪辑、添加字幕、特效
 - [ ] 多平台发布：Bilibili、YouTube、抖音、小红书、微信
+
+## 🚀 Podcast Downloader Skill v2.0 特性
+
+### 核心功能
+- **iTunes API 优先**：比传统 RSS 解析快 3-5 倍
+- **智能地区检测**：自动从 URL 提取国家代码（cn/us/jp/uk 等）
+- **多重回退机制**：
+  1. 直接 API 查询（最快）
+  2. 列表搜索（快速）
+  3. RSS feed 解析（可靠回退）
+- **丰富元数据**：保存标题、发布日期、时长、描述等
+
+### 使用示例
+
+**下载指定单集**：
+```bash
+python scripts/download_podcast.py "https://podcasts.apple.com/cn/podcast/id1711052890?i=1000736888214"
+```
+
+**下载最新 3 集**：
+```bash
+python scripts/download_podcast.py "https://podcasts.apple.com/cn/podcast/id1711052890" -n 3
+```
+
+### 实际测试案例
+- ✅ 「独树不成林」播客
+  - 289 - 我在童年如何与权威周旋？（36MB, 40分钟）
+  - 288 - 伊朗老百姓为什么这么讨厌伊斯兰共和国？（36MB, 39分钟）
+  - 287 - 2025年美国政府呈现出什么总体大趋势？（32MB, 34分钟）
 
 ## 📝 相关资源
 
 - [Claude Skills 官方文档](https://docs.anthropic.com/en/docs/build-with-claude/claude-skills)
 - [第一期视频 - NotebookLM 完整工作流](../notebooklm/)
-- [播客下载 Skill 代码](skills/) - 实际开发的 Skill
+- [Podcast Downloader Skill v2.0 源码](skills/podcast-downloader/) - 实际开发的 Skill
+- [Podcast Downloader Skill v2.0 打包文件](artifact/podcast-downloader-v2-skill.tar.gz) - 用于导入 claude.ai
 
 ## 🔗 发布平台
 
@@ -73,4 +110,5 @@
 ---
 
 **创建日期**: 2026-01-13
-**状态**: 🚧 筹备中
+**最后更新**: 2026-01-14
+**状态**: 🔧 开发中（Skill v2.0 已完成，已提交到 Git）
