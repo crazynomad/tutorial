@@ -15,12 +15,6 @@
 
 ```
 02-podcast-downloader/
-├── downloads/                      # 下载的播客文件（示例和测试）
-│   └── 独树不成林/                # 实际下载的播客示例
-├── recording/                      # ScreenFlow 录制项目文件
-├── output/                         # 最终输出的视频文件
-├── capcut/                         # 剪映项目文件
-├── aigc/                          # AI 生成的内容素材
 ├── artifact/                      # 打包的产出物
 │   └── podcast-downloader-v2-skill.tar.gz  # Skill 打包文件（用于分发）
 ├── skills/                        # Skills 源代码
@@ -29,7 +23,6 @@
 │       ├── scripts/              # 核心脚本
 │       └── references/           # 参考文档
 ├── transript/                     # 视频字幕文件
-├── sample/                        # 示例文件和模板
 ├── prompt/                        # NotebookLM 提示词
 └── README.md                      # 本文件
 ```
