@@ -63,6 +63,7 @@ python scripts/mole_cleaner.py --status
 | `--status` | 显示当前磁盘使用状态 | - |
 | `--auto-install` | 自动安装缺失的依赖 | False |
 | `--json` | 输出 JSON 格式报告 | False |
+| `--no-sample-data` | 解析失败时不使用示例数据 | False |
 | `-o, --output` | 保存报告到文件 | - |
 
 ## Dependencies

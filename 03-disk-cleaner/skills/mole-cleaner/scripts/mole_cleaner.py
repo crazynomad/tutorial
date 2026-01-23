@@ -255,7 +255,51 @@ class MoleCleaner:
 
         return "其他", "其他可清理文件"
 
-    def run_dry_run(self) -> Optional[CleanReport]:
+    def _read_clean_list(self) -> list:
+        """读取 Mole 生成的 clean-list.txt（若存在）"""
+        clean_list_path = os.path.expanduser("~/.config/mole/clean-list.txt")
+        if not os.path.exists(clean_list_path):
+            return []
+
+        paths = []
+        try:
+            with open(clean_list_path, "r", encoding="utf-8", errors="ignore") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    paths.append(os.path.expanduser(line))
+        except Exception:
+            return []
+
+        return paths
+
+    def _count_items(self, paths: list) -> tuple:
+        """统计文件/目录数量"""
+        file_count = 0
+        dir_count = 0
+        for path in paths:
+            try:
+                if os.path.isdir(path):
+                    dir_count += 1
+                elif os.path.isfile(path):
+                    file_count += 1
+            except Exception:
+                continue
+        return file_count, dir_count
+
+    def _extract_protected_items(self, output: str) -> list:
+        """从 Mole 输出中提取已保护项目（若有）"""
+        protected = []
+        for line in output.split("\n"):
+            clean_line = re.sub(r'\x1b\[[0-9;]*m', '', line).strip()
+            if not clean_line:
+                continue
+            if "protect" in clean_line.lower() or "skip" in clean_line.lower():
+                protected.append(clean_line)
+        return protected
+
+    def run_dry_run(self, allow_sample_data: bool = True) -> Optional[CleanReport]:
         """执行 dry-run 并解析结果"""
         if not self.mole_path:
             print("❌ Mole 未安装")
@@ -323,13 +367,21 @@ class MoleCleaner:
                             categories[category] = {
                                 "size_bytes": 0,
                                 "description": desc,
-                                "items": []
+                                "items": 0
                             }
                         categories[category]["size_bytes"] += size_bytes
+                        categories[category]["items"] += 1
                         total_bytes += size_bytes
 
-            # 如果没有解析到数据，使用模拟数据展示格式
-            if not categories:
+            # 如果没有解析到数据，尝试从 clean-list.txt 做补充统计
+            clean_list_paths = self._read_clean_list()
+            report.file_count, report.dir_count = self._count_items(clean_list_paths)
+
+            # 尝试提取已保护项目
+            protected_from_output = self._extract_protected_items(output)
+
+            # 如果没有解析到数据，使用模拟数据展示格式（可选）
+            if not categories and allow_sample_data:
                 # 提供一个示例报告结构
                 categories = {
                     "用户应用缓存": {"size_bytes": 24270000000, "description": "各应用产生的临时缓存文件", "items": []},
@@ -343,7 +395,10 @@ class MoleCleaner:
             report.categories = categories
             report.total_size_bytes = total_bytes
             report.total_size_human = self._format_size(total_bytes)
-            report.protected_items = ["Playwright 缓存", "Ollama 模型", "JetBrains 配置", "iCloud 文档"]
+            if protected_from_output:
+                report.protected_items = protected_from_output
+            else:
+                report.protected_items = ["Playwright 缓存", "Ollama 模型", "JetBrains 配置", "iCloud 文档"]
 
             return report
 
@@ -367,11 +422,14 @@ class MoleCleaner:
                 "cleanable": {
                     "total_size": report.total_size_human,
                     "total_bytes": report.total_size_bytes,
+                    "file_count": report.file_count,
+                    "dir_count": report.dir_count,
                     "categories": {
                         k: {
                             "size": self._format_size(v["size_bytes"]),
                             "size_bytes": v["size_bytes"],
-                            "description": v["description"]
+                            "description": v["description"],
+                            "items": v.get("items", 0)
                         } for k, v in report.categories.items()
                     }
                 },
@@ -406,6 +464,8 @@ class MoleCleaner:
 
         lines.append("━" * 64)
         lines.append(f"📈 预计可释放空间: {report.total_size_human}")
+        if report.file_count or report.dir_count:
+            lines.append(f"📁 涉及文件: {report.file_count} 个，目录: {report.dir_count} 个")
         lines.append("")
         lines.append("💡 建议:")
 
@@ -539,6 +599,7 @@ def main():
     parser.add_argument("--status", action="store_true", help="显示磁盘状态")
     parser.add_argument("--auto-install", action="store_true", help="自动安装缺失依赖")
     parser.add_argument("--json", action="store_true", help="JSON 格式输出")
+    parser.add_argument("--no-sample-data", action="store_true", help="禁用解析失败时的示例数据")
     parser.add_argument("-o", "--output", help="保存报告到文件")
 
     args = parser.parse_args()
@@ -580,7 +641,7 @@ def main():
 
     # 预览
     if args.preview:
-        report = cleaner.run_dry_run()
+        report = cleaner.run_dry_run(allow_sample_data=not args.no_sample_data)
         if report:
             output = cleaner.generate_report(report, use_json=args.json)
             print(output)
