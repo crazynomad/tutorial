@@ -372,15 +372,31 @@ class MoleCleaner:
         total_bytes = 0
         for path in paths:
             try:
+                # clean-list.txt 行可能包含注释: "/path # 2.01GB (18 items)"
+                size_bytes = 0
+                item_count = None
+                size_match = re.search(r'#\s*([\d.]+)\s*(B|KB|MB|GB|TB)', path, re.IGNORECASE)
+                if size_match:
+                    size_bytes = self._parse_size(size_match.group(0).replace("#", "").strip())
+                items_match = re.search(r'\((\d+)\s+items\)', path, re.IGNORECASE)
+                if items_match:
+                    item_count = int(items_match.group(1))
+
+                # 提取真实路径（去掉注释）
+                clean_path = path.split("#", 1)[0].strip()
+                if not clean_path or clean_path.startswith("==="):
+                    continue
+
                 category, desc = self._categorize_path(path)
                 if category not in categories:
                     categories[category] = {"size_bytes": 0, "description": desc, "items": 0}
-                categories[category]["items"] += 1
+                categories[category]["items"] += item_count if item_count is not None else 1
 
-                if os.path.isfile(path):
-                    size_bytes = os.path.getsize(path)
-                    categories[category]["size_bytes"] += size_bytes
-                    total_bytes += size_bytes
+                if size_bytes == 0 and os.path.isfile(clean_path):
+                    size_bytes = os.path.getsize(clean_path)
+
+                categories[category]["size_bytes"] += size_bytes
+                total_bytes += size_bytes
             except Exception:
                 continue
         return categories, total_bytes
@@ -465,7 +481,7 @@ class MoleCleaner:
             # 兼容策略：使用 clean-list.txt 生成分类
             if not categories and clean_list_paths:
                 categories, total_bytes = self._categorize_paths_from_clean_list(clean_list_paths)
-                report.warnings.append("解析基于 clean-list.txt：目录大小未统计，结果为低估。")
+                report.warnings.append("解析基于 clean-list.txt：目录大小来自 Mole 预估，可能存在偏差。")
 
             # 如果仍没有解析到数据，使用模拟数据展示格式（可选）
             if not categories and allow_sample_data:
@@ -485,7 +501,7 @@ class MoleCleaner:
             if protected_from_output:
                 report.protected_items = protected_from_output
             else:
-            report.protected_items = ["Playwright 缓存", "Ollama 模型", "JetBrains 配置", "iCloud 文档"]
+                report.protected_items = ["Playwright 缓存", "Ollama 模型", "JetBrains 配置", "iCloud 文档"]
 
             return report
 
