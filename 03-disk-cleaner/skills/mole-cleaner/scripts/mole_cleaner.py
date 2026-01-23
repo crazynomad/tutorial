@@ -358,11 +358,25 @@ class MoleCleaner:
     def _extract_protected_items(self, output: str) -> list:
         """从 Mole 输出中提取已保护项目（若有）"""
         protected = []
+        in_whitelist = False
         for line in output.split("\n"):
             clean_line = re.sub(r'\x1b\[[0-9;]*m', '', line).strip()
             if not clean_line:
                 continue
-            if "protect" in clean_line.lower() or "skip" in clean_line.lower():
+            lower = clean_line.lower()
+            if "whitelist" in lower:
+                in_whitelist = True
+                continue
+            if in_whitelist:
+                if clean_line.startswith("→") or clean_line.startswith("->"):
+                    protected.append(clean_line.replace("→", "").replace("->", "").strip())
+                    continue
+                # whitelist 区块结束
+                if clean_line.startswith("➤") or clean_line.startswith("─"):
+                    in_whitelist = False
+            if "protect" in lower or "skip" in lower:
+                if "running" in lower or "whitelist" in lower:
+                    continue
                 protected.append(clean_line)
         return protected
 
@@ -387,7 +401,7 @@ class MoleCleaner:
                 if not clean_path or clean_path.startswith("==="):
                     continue
 
-                category, desc = self._categorize_path(path)
+                category, desc = self._categorize_path(clean_path)
                 if category not in categories:
                     categories[category] = {"size_bytes": 0, "description": desc, "items": 0}
                 categories[category]["items"] += item_count if item_count is not None else 1
@@ -431,33 +445,40 @@ class MoleCleaner:
             report.disk_available_before = disk_status.get("available", "Unknown")
             report.disk_used = disk_status.get("used", "Unknown")
 
-            # 解析清理项目
-            # 匹配类似: "  ✓ /path/to/file (1.23 GB)"
-            # 或: "  • Category Name  1.23 GB"
-            size_pattern = re.compile(r'([\d.]+)\s*(B|KB|MB|GB|TB)', re.IGNORECASE)
-            path_pattern = re.compile(r'[/~][\w\-./]+')
-
+            # 解析清理项目（优先 clean-list，输出解析为备用）
             categories = {}
             total_bytes = 0
 
-            for line in output.split('\n'):
-                # 清理 ANSI 转义序列
-                clean_line = re.sub(r'\x1b\[[0-9;]*m', '', line)
-                clean_line = re.sub(r'\[2K', '', clean_line)
+            # 优先使用 clean-list.txt（更稳定）
+            clean_list_paths = self._read_clean_list()
+            report.file_count, report.dir_count = self._count_items(clean_list_paths)
 
-                # 查找大小
-                size_match = size_pattern.search(clean_line)
-                if size_match:
+            # 尝试提取已保护项目
+            protected_from_output = self._extract_protected_items(output)
+
+            if clean_list_paths:
+                categories, total_bytes = self._categorize_paths_from_clean_list(clean_list_paths)
+                report.warnings.append("解析基于 clean-list.txt：目录大小来自 Mole 预估，可能存在偏差。")
+            else:
+                # clean-list 不可用时回退解析输出
+                size_pattern = re.compile(r'([\d.]+)\s*(B|KB|MB|GB|TB)', re.IGNORECASE)
+                path_pattern = re.compile(r'[/~][\w\-./]+')
+
+                for line in output.split('\n'):
+                    clean_line = re.sub(r'\x1b\[[0-9;]*m', '', line)
+                    clean_line = re.sub(r'\[2K', '', clean_line)
+
+                    size_match = size_pattern.search(clean_line)
+                    if not size_match:
+                        continue
                     size_str = size_match.group(0)
                     size_bytes = self._parse_size(size_str)
 
-                    # 查找路径或类别名
                     path_match = path_pattern.search(clean_line)
                     if path_match:
                         path = path_match.group(0)
                         category, desc = self._categorize_path(path)
                     else:
-                        # 尝试从行内容推断类别
                         category, desc = self._categorize_path(clean_line)
 
                     if size_bytes > 0:
@@ -470,18 +491,6 @@ class MoleCleaner:
                         categories[category]["size_bytes"] += size_bytes
                         categories[category]["items"] += 1
                         total_bytes += size_bytes
-
-            # 如果没有解析到数据，尝试从 clean-list.txt 做补充统计
-            clean_list_paths = self._read_clean_list()
-            report.file_count, report.dir_count = self._count_items(clean_list_paths)
-
-            # 尝试提取已保护项目
-            protected_from_output = self._extract_protected_items(output)
-
-            # 兼容策略：使用 clean-list.txt 生成分类
-            if not categories and clean_list_paths:
-                categories, total_bytes = self._categorize_paths_from_clean_list(clean_list_paths)
-                report.warnings.append("解析基于 clean-list.txt：目录大小来自 Mole 预估，可能存在偏差。")
 
             # 如果仍没有解析到数据，使用模拟数据展示格式（可选）
             if not categories and allow_sample_data:
