@@ -141,6 +141,11 @@ python scripts/mole_cleaner.py --status
   • Ollama 模型
   • JetBrains 配置
   • iCloud 文档
+
+🧭 清理策略建议（预估）:
+  1) 低风险：X.XX GB
+  2) 默认：X.XX GB
+  3) 最大拯救：X.XX GB
 ```
 
 ### 日志

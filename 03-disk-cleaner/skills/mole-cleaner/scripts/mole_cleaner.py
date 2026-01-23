@@ -43,6 +43,7 @@ class CleanReport:
     dir_count: int = 0
     protected_items: list = field(default_factory=list)
     warnings: list = field(default_factory=list)
+    tier_estimates: dict = field(default_factory=dict)
 
 
 class MoleCleaner:
@@ -415,6 +416,33 @@ class MoleCleaner:
                 continue
         return categories, total_bytes
 
+    def _estimate_tiers(self, categories: dict) -> dict:
+        """估算三档清理策略的可释放空间"""
+        low_risk = 0
+        default = 0
+        maximum = 0
+
+        # 默认更保守的 caution 列表（不纳入默认档）
+        caution_exclude = {"应用支持文件", "应用专属缓存", "通讯应用缓存"}
+
+        for category, data in categories.items():
+            size = data.get("size_bytes", 0)
+            advice_type, _ = self.CATEGORY_ADVICE.get(category, ("info", ""))
+
+            maximum += size
+            if advice_type == "safe":
+                low_risk += size
+                default += size
+            elif advice_type == "caution":
+                if category not in caution_exclude:
+                    default += size
+
+        return {
+            "low_risk": low_risk,
+            "default": default,
+            "maximum": maximum
+        }
+
     def run_dry_run(self, allow_sample_data: bool = True) -> Optional[CleanReport]:
         """执行 dry-run 并解析结果"""
         if not self.mole_path:
@@ -512,6 +540,14 @@ class MoleCleaner:
             else:
                 report.protected_items = ["Playwright 缓存", "Ollama 模型", "JetBrains 配置", "iCloud 文档"]
 
+            # 生成分层策略估算
+            tier_bytes = self._estimate_tiers(report.categories)
+            report.tier_estimates = {
+                "low_risk": self._format_size(tier_bytes["low_risk"]),
+                "default": self._format_size(tier_bytes["default"]),
+                "maximum": self._format_size(tier_bytes["maximum"]),
+            }
+
             return report
 
         except subprocess.TimeoutExpired:
@@ -537,6 +573,7 @@ class MoleCleaner:
                     "file_count": report.file_count,
                     "dir_count": report.dir_count,
                     "warnings": report.warnings,
+                    "tiers": report.tier_estimates,
                     "categories": {
                         k: {
                             "size": self._format_size(v["size_bytes"]),
@@ -599,6 +636,22 @@ class MoleCleaner:
         lines.append("🔒 已保护项目（不会清理）:")
         for item in report.protected_items:
             lines.append(f"  • {item}")
+
+        # 友好解读与风险收益
+        if report.tier_estimates:
+            lines.append("")
+            lines.append("🧠 解读与风险收益")
+            lines.append("  - 低风险：仅清理可快速重建的缓存（体验影响最小）。")
+            lines.append("  - 默认：在低风险基础上谨慎扩展，适合多数用户。")
+            lines.append("  - 最大拯救：包含可能影响使用体验的缓存，建议先备份或确认。")
+
+        if report.tier_estimates:
+            lines.append("")
+            lines.append("🧭 清理策略建议（预估）:")
+            lines.append(f"  1) 低风险：{report.tier_estimates.get('low_risk', '0 B')}")
+            lines.append(f"  2) 默认：{report.tier_estimates.get('default', '0 B')}")
+            lines.append(f"  3) 最大拯救：{report.tier_estimates.get('maximum', '0 B')}")
+            lines.append("  提示：以上为估算值，实际释放空间以 Mole 清理结果为准。")
 
         return "\n".join(lines)
 
