@@ -718,7 +718,8 @@ def main():
     parser.add_argument("--json", action="store_true", help="JSON 格式输出")
     parser.add_argument("--no-sample-data", action="store_true", help="禁用解析失败时的示例数据")
     parser.add_argument("--save-report", action="store_true", help="保存报告到默认路径")
-    parser.add_argument("--confirm", action="store_true", help="清理前进行二次确认")
+    parser.add_argument("--confirm", action="store_true", help="清理前进行二次确认（非交互）")
+    parser.add_argument("--interactive-confirm", action="store_true", help="清理前进行交互式确认（仅用于手动测试）")
     parser.add_argument("-o", "--output", help="保存报告到文件")
 
     args = parser.parse_args()
@@ -787,11 +788,16 @@ def main():
 
             # 在脚本中直接执行，不需要确认（由 Claude 在对话中处理确认）
             print("=" * 64)
-            if args.confirm:
+            if args.interactive_confirm:
                 confirm_text = input("请输入 CLEAN 确认执行清理: ").strip()
                 if confirm_text != "CLEAN":
                     print("❌ 已取消清理")
                     return
+            elif not args.confirm:
+                print("❌ 未提供确认参数，已取消清理")
+                print("   请使用 --confirm 让调用方在对话中完成确认后再执行")
+                print("   或使用 --interactive-confirm 进行手动测试")
+                return
             cleaner.run_clean()
 
 

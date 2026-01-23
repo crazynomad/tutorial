@@ -43,9 +43,14 @@ python scripts/mole_cleaner.py --preview
 python scripts/mole_cleaner.py --clean
 ```
 
-**执行清理（带二次确认）**:
+**执行清理（带二次确认，非交互）**:
 ```bash
 python scripts/mole_cleaner.py --clean --confirm
+```
+
+**执行清理（交互式确认，仅用于手动测试）**:
+```bash
+python scripts/mole_cleaner.py --clean --interactive-confirm
 ```
 
 **仅检查环境**:
@@ -70,7 +75,8 @@ python scripts/mole_cleaner.py --status
 | `--json` | 输出 JSON 格式报告 | False |
 | `--no-sample-data` | 解析失败时不使用示例数据 | False |
 | `--save-report` | 保存报告到默认路径 | False |
-| `--confirm` | 清理前进行二次确认 | False |
+| `--confirm` | 清理前进行二次确认（非交互） | False |
+| `--interactive-confirm` | 清理前交互式确认（仅用于手动测试） | False |
 | `-o, --output` | 保存报告到文件 | - |
 
 ## Dependencies
