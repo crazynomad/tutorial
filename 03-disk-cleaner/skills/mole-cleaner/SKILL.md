@@ -130,6 +130,10 @@ python scripts/mole_cleaner.py --status
   • iCloud 文档
 ```
 
+### 日志
+
+- Dry-run 和清理日志会保存到：`~/.config/mole-cleaner/logs/`
+
 ### 清理效果展示
 
 ```

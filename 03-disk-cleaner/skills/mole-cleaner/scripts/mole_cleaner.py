@@ -46,29 +46,34 @@ class CleanReport:
 
 class MoleCleaner:
     """Mole 清理工具包装器"""
+    LOG_DIR = os.path.expanduser("~/.config/mole-cleaner/logs")
 
-    # 类别映射和描述
-    CATEGORY_MAP = {
-        "user cache": ("用户应用缓存", "各应用产生的临时缓存文件，清理后会自动重建"),
-        "caches": ("用户应用缓存", "各应用产生的临时缓存文件，清理后会自动重建"),
-        "huggingface": ("AI 模型缓存", "HuggingFace 模型缓存，如不使用可清理"),
-        "browser": ("浏览器缓存", "Chrome/Safari 等浏览器缓存数据"),
-        "chrome": ("浏览器缓存", "Chrome 浏览器缓存数据"),
-        "safari": ("浏览器缓存", "Safari 浏览器缓存数据"),
-        "firefox": ("浏览器缓存", "Firefox 浏览器缓存数据"),
-        "simulator": ("iOS 模拟器缓存", "Xcode Simulator dyld 缓存"),
-        "xcode": ("开发工具缓存", "Xcode DerivedData 等编译缓存"),
-        "vscode": ("开发工具缓存", "VS Code 扩展和缓存"),
-        "homebrew": ("包管理器缓存", "Homebrew 下载缓存"),
-        "npm": ("包管理器缓存", "npm 包缓存"),
-        "pnpm": ("包管理器缓存", "pnpm 包缓存"),
-        "yarn": ("包管理器缓存", "Yarn 包缓存"),
-        "pip": ("包管理器缓存", "pip 包缓存"),
-        "screenflow": ("应用专属缓存", "ScreenFlow 项目缓存"),
-        "application support": ("应用支持文件", "应用支持文件中的日志和缓存"),
-        "logs": ("系统日志", "应用和系统日志文件"),
-        "trash": ("废纸篓", "已删除的文件"),
-    }
+    # 类别映射与描述（按优先级匹配）
+    CATEGORY_RULES = [
+        (["/library/logs", "/var/log", "crashreporter", "diagnosticreports", "logs"],
+         ("系统日志", "应用和系统日志文件")),
+        (["huggingface", "transformers", "ollama", "models", "lm-studio"],
+         ("AI 模型缓存", "模型缓存，如不使用可清理")),
+        (["coresimulator", "simulator", "xcode/deriveddata", "deriveddata"],
+         ("iOS 模拟器缓存", "Xcode Simulator/DerivedData 缓存")),
+        (["chrome", "safari", "firefox", "edge", "brave", "vivaldi", "browser"],
+         ("浏览器缓存", "Chrome/Safari 等浏览器缓存数据")),
+        (["homebrew", "brew", "npm", "pnpm", "yarn", "pip", "pip3", "cargo", ".cargo",
+          ".gradle", ".m2", "go/pkg/mod"],
+         ("包管理器缓存", "包管理器下载与构建缓存")),
+        (["vscode", "intellij", "jetbrains", "pycharm", "webstorm", "xcode", "android studio"],
+         ("开发工具缓存", "开发工具与 IDE 缓存")),
+        (["wechat", "qq", "tencent", "messages", "chat", "wechatfiles"],
+         ("通讯应用缓存", "聊天媒体与缓存文件")),
+        (["screenflow", "capcut", "final cut", "logic", "adobe", "photoshop", "lightroom"],
+         ("应用专属缓存", "专业应用缓存或项目文件")),
+        (["application support"],
+         ("应用支持文件", "应用支持文件中的日志和缓存")),
+        (["cache", "caches", "tmp", "temp"],
+         ("用户应用缓存", "各应用产生的临时缓存文件，清理后会自动重建")),
+        (["/.trash", "/trash", "trash"],
+         ("废纸篓", "已删除的文件")),
+    ]
 
     # 类别图标
     CATEGORY_ICONS = {
@@ -82,6 +87,7 @@ class MoleCleaner:
         "应用支持文件": "📁",
         "系统日志": "📋",
         "废纸篓": "🗑️",
+        "通讯应用缓存": "💬",
         "其他": "📄",
     }
 
@@ -97,6 +103,7 @@ class MoleCleaner:
         "应用专属缓存": ("caution", "检查是否有未保存的项目"),
         "应用支持文件": ("caution", "可能包含应用设置"),
         "废纸篓": ("safe", "永久删除废纸篓内容"),
+        "通讯应用缓存": ("caution", "清理可能影响聊天历史中的媒体显示"),
     }
 
     def __init__(self):
@@ -118,6 +125,19 @@ class MoleCleaner:
             if os.path.exists(path):
                 return path
         return shutil.which("mo")
+
+    def _write_log(self, name: str, content: str) -> Optional[str]:
+        """写入日志文件"""
+        try:
+            os.makedirs(self.LOG_DIR, exist_ok=True)
+            timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+            filename = f"{timestamp}-{name}.log"
+            path = os.path.join(self.LOG_DIR, filename)
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(content)
+            return path
+        except Exception:
+            return None
 
     def check_environment(self) -> dict:
         """检查环境"""
@@ -249,9 +269,10 @@ class MoleCleaner:
         """根据路径判断类别"""
         path_lower = path.lower()
 
-        for keyword, (category, desc) in self.CATEGORY_MAP.items():
-            if keyword in path_lower:
-                return category, desc
+        for keywords, (category, desc) in self.CATEGORY_RULES:
+            for keyword in keywords:
+                if keyword in path_lower:
+                    return category, desc
 
         return "其他", "其他可清理文件"
 
@@ -318,6 +339,9 @@ class MoleCleaner:
             )
 
             output = result.stdout + result.stderr
+            log_path = self._write_log("dry-run", output)
+            if log_path:
+                print(f"📝 已保存 dry-run 日志: {log_path}")
 
             # 解析输出
             report = CleanReport(
@@ -507,6 +531,10 @@ class MoleCleaner:
                 text=True,
                 timeout=600
             )
+            output = result.stdout + result.stderr
+            log_path = self._write_log("clean", output)
+            if log_path:
+                print(f"📝 已保存清理日志: {log_path}")
 
             # 记录清理后状态
             after_status = self.get_disk_status()
