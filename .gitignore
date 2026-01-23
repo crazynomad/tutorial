@@ -25,6 +25,13 @@ software/*.wmv
 
 # Claude Code local settings
 .claude/
+.agent/
+.agents/
+.codex/
+.cursor/
+.gemini/
+.opencode/
+.windsurf/
 
 # Tutorial videos and large media
 software/ScreenFlow教程/*
