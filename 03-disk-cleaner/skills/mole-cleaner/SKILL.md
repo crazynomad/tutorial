@@ -43,6 +43,11 @@ python scripts/mole_cleaner.py --preview
 python scripts/mole_cleaner.py --clean
 ```
 
+**执行清理（带二次确认）**:
+```bash
+python scripts/mole_cleaner.py --clean --confirm
+```
+
 **仅检查环境**:
 ```bash
 python scripts/mole_cleaner.py --check
@@ -64,6 +69,8 @@ python scripts/mole_cleaner.py --status
 | `--auto-install` | 自动安装缺失的依赖 | False |
 | `--json` | 输出 JSON 格式报告 | False |
 | `--no-sample-data` | 解析失败时不使用示例数据 | False |
+| `--save-report` | 保存报告到默认路径 | False |
+| `--confirm` | 清理前进行二次确认 | False |
 | `-o, --output` | 保存报告到文件 | - |
 
 ## Dependencies
@@ -133,6 +140,7 @@ python scripts/mole_cleaner.py --status
 ### 日志
 
 - Dry-run 和清理日志会保存到：`~/.config/mole-cleaner/logs/`
+- 可选保存报告到：`~/.config/mole-cleaner/reports/`
 
 ### 清理效果展示
 

@@ -42,11 +42,13 @@ class CleanReport:
     file_count: int = 0
     dir_count: int = 0
     protected_items: list = field(default_factory=list)
+    warnings: list = field(default_factory=list)
 
 
 class MoleCleaner:
     """Mole 清理工具包装器"""
     LOG_DIR = os.path.expanduser("~/.config/mole-cleaner/logs")
+    REPORT_DIR = os.path.expanduser("~/.config/mole-cleaner/reports")
 
     # 类别映射与描述（按优先级匹配）
     CATEGORY_RULES = [
@@ -138,6 +140,50 @@ class MoleCleaner:
             return path
         except Exception:
             return None
+
+    def _write_report(self, content: str) -> Optional[str]:
+        """写入报告文件"""
+        try:
+            os.makedirs(self.REPORT_DIR, exist_ok=True)
+            timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+            filename = f"{timestamp}-report.txt"
+            path = os.path.join(self.REPORT_DIR, filename)
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(content)
+            return path
+        except Exception:
+            return None
+
+    def _run_mole_command(self, args: list, timeout: int = 300) -> tuple[int, str]:
+        """运行 Mole 命令，优先使用 script 模拟 TTY，失败则回退"""
+        env = {**os.environ, "TERM": "dumb"}
+        # 尝试使用 script
+        try:
+            result = subprocess.run(
+                ["script", "-q", "/dev/null", self.mole_path, *args],
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                env=env
+            )
+            output = result.stdout + result.stderr
+            if result.returncode == 0 and output.strip():
+                return result.returncode, output
+        except Exception:
+            pass
+
+        # 回退直接执行
+        try:
+            result = subprocess.run(
+                [self.mole_path, *args],
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                env=env
+            )
+            return result.returncode, result.stdout + result.stderr
+        except Exception as e:
+            return 1, str(e)
 
     def check_environment(self) -> dict:
         """检查环境"""
@@ -320,6 +366,25 @@ class MoleCleaner:
                 protected.append(clean_line)
         return protected
 
+    def _categorize_paths_from_clean_list(self, paths: list) -> tuple[dict, int]:
+        """从 clean-list.txt 路径构建分类与大小（兼容 Mole 输出变化）"""
+        categories = {}
+        total_bytes = 0
+        for path in paths:
+            try:
+                category, desc = self._categorize_path(path)
+                if category not in categories:
+                    categories[category] = {"size_bytes": 0, "description": desc, "items": 0}
+                categories[category]["items"] += 1
+
+                if os.path.isfile(path):
+                    size_bytes = os.path.getsize(path)
+                    categories[category]["size_bytes"] += size_bytes
+                    total_bytes += size_bytes
+            except Exception:
+                continue
+        return categories, total_bytes
+
     def run_dry_run(self, allow_sample_data: bool = True) -> Optional[CleanReport]:
         """执行 dry-run 并解析结果"""
         if not self.mole_path:
@@ -329,16 +394,9 @@ class MoleCleaner:
         print("🔍 正在扫描可清理项目...")
 
         try:
-            # 使用 script 命令来模拟 TTY
-            result = subprocess.run(
-                ["script", "-q", "/dev/null", self.mole_path, "clean", "--dry-run"],
-                capture_output=True,
-                text=True,
-                timeout=300,
-                env={**os.environ, "TERM": "dumb"}
-            )
-
-            output = result.stdout + result.stderr
+            code, output = self._run_mole_command(["clean", "--dry-run"], timeout=300)
+            if code != 0 and not output.strip():
+                print("⚠️  dry-run 输出为空，可能与终端环境有关")
             log_path = self._write_log("dry-run", output)
             if log_path:
                 print(f"📝 已保存 dry-run 日志: {log_path}")
@@ -404,13 +462,18 @@ class MoleCleaner:
             # 尝试提取已保护项目
             protected_from_output = self._extract_protected_items(output)
 
-            # 如果没有解析到数据，使用模拟数据展示格式（可选）
+            # 兼容策略：使用 clean-list.txt 生成分类
+            if not categories and clean_list_paths:
+                categories, total_bytes = self._categorize_paths_from_clean_list(clean_list_paths)
+                report.warnings.append("解析基于 clean-list.txt：目录大小未统计，结果为低估。")
+
+            # 如果仍没有解析到数据，使用模拟数据展示格式（可选）
             if not categories and allow_sample_data:
                 # 提供一个示例报告结构
                 categories = {
-                    "用户应用缓存": {"size_bytes": 24270000000, "description": "各应用产生的临时缓存文件", "items": []},
-                    "浏览器缓存": {"size_bytes": 4240000000, "description": "Chrome/Safari 等浏览器缓存", "items": []},
-                    "包管理器缓存": {"size_bytes": 1580000000, "description": "Homebrew/npm 等下载缓存", "items": []},
+                    "用户应用缓存": {"size_bytes": 24270000000, "description": "各应用产生的临时缓存文件", "items": 0},
+                    "浏览器缓存": {"size_bytes": 4240000000, "description": "Chrome/Safari 等浏览器缓存", "items": 0},
+                    "包管理器缓存": {"size_bytes": 1580000000, "description": "Homebrew/npm 等下载缓存", "items": 0},
                 }
                 total_bytes = sum(c["size_bytes"] for c in categories.values())
                 print("⚠️  使用估算数据（dry-run 输出解析受限）")
@@ -422,7 +485,7 @@ class MoleCleaner:
             if protected_from_output:
                 report.protected_items = protected_from_output
             else:
-                report.protected_items = ["Playwright 缓存", "Ollama 模型", "JetBrains 配置", "iCloud 文档"]
+            report.protected_items = ["Playwright 缓存", "Ollama 模型", "JetBrains 配置", "iCloud 文档"]
 
             return report
 
@@ -448,6 +511,7 @@ class MoleCleaner:
                     "total_bytes": report.total_size_bytes,
                     "file_count": report.file_count,
                     "dir_count": report.dir_count,
+                    "warnings": report.warnings,
                     "categories": {
                         k: {
                             "size": self._format_size(v["size_bytes"]),
@@ -490,6 +554,10 @@ class MoleCleaner:
         lines.append(f"📈 预计可释放空间: {report.total_size_human}")
         if report.file_count or report.dir_count:
             lines.append(f"📁 涉及文件: {report.file_count} 个，目录: {report.dir_count} 个")
+        if report.warnings:
+            lines.append("⚠️  注意:")
+            for warning in report.warnings:
+                lines.append(f"  • {warning}")
         lines.append("")
         lines.append("💡 建议:")
 
@@ -525,13 +593,9 @@ class MoleCleaner:
 
         try:
             # 执行清理
-            result = subprocess.run(
-                ["script", "-q", "/dev/null", self.mole_path, "clean"],
-                capture_output=True,
-                text=True,
-                timeout=600
-            )
-            output = result.stdout + result.stderr
+            code, output = self._run_mole_command(["clean"], timeout=600)
+            if code != 0 and output.strip():
+                print("⚠️  清理过程中出现提示，请查看日志详情")
             log_path = self._write_log("clean", output)
             if log_path:
                 print(f"📝 已保存清理日志: {log_path}")
@@ -628,6 +692,8 @@ def main():
     parser.add_argument("--auto-install", action="store_true", help="自动安装缺失依赖")
     parser.add_argument("--json", action="store_true", help="JSON 格式输出")
     parser.add_argument("--no-sample-data", action="store_true", help="禁用解析失败时的示例数据")
+    parser.add_argument("--save-report", action="store_true", help="保存报告到默认路径")
+    parser.add_argument("--confirm", action="store_true", help="清理前进行二次确认")
     parser.add_argument("-o", "--output", help="保存报告到文件")
 
     args = parser.parse_args()
@@ -678,6 +744,10 @@ def main():
                 with open(args.output, "w", encoding="utf-8") as f:
                     f.write(output)
                 print(f"\n📄 报告已保存到: {args.output}")
+            elif args.save_report:
+                report_path = cleaner._write_report(output)
+                if report_path:
+                    print(f"\n📄 报告已保存到: {report_path}")
         return
 
     # 清理
@@ -692,6 +762,11 @@ def main():
 
             # 在脚本中直接执行，不需要确认（由 Claude 在对话中处理确认）
             print("=" * 64)
+            if args.confirm:
+                confirm_text = input("请输入 CLEAN 确认执行清理: ").strip()
+                if confirm_text != "CLEAN":
+                    print("❌ 已取消清理")
+                    return
             cleaner.run_clean()
 
 
