@@ -23,7 +23,12 @@ software/*.wmv
 # Thumbnails
 ._*
 
-# Claude Code local settings
+# Remotion projects
+**/remotion-*/
+**/node_modules/
+**/out/
+
+# AI coding assistants local settings
 .claude/
 .agent/
 .agents/
@@ -42,14 +47,12 @@ software/*
 !software/README.md
 !software/.gitkeep
 
-# Tutorial Episode video production directories (applies to notebooklm/, 02-podcast-downloader/, 03-*, etc.)
-# Production directories
-notebooklm/downloads/
-notebooklm/aigc/
-notebooklm/sample/
-notebooklm/capcut/
-notebooklm/recording/
-notebooklm/output/
+# ===========================================
+# Tutorial Episode directories ([0-9][0-9]-*)
+# Matches: 02-podcast-downloader, 03-disk-cleaner, 04-*, etc.
+# ===========================================
+
+# Production directories (not tracked)
 [0-9][0-9]-*/downloads/
 [0-9][0-9]-*/aigc/
 [0-9][0-9]-*/sample/
@@ -57,34 +60,21 @@ notebooklm/output/
 [0-9][0-9]-*/recording/
 [0-9][0-9]-*/output/
 
-# Scripts and checklists (private)
-notebooklm/NotebookLM录屏执行Checklist.md
-notebooklm/NotebookLM视频脚本.md
+# Private scripts and checklists
 [0-9][0-9]-*/**/*Checklist.md
 [0-9][0-9]-*/**/*checklist.md
 [0-9][0-9]-*/**/*脚本.md
+[0-9][0-9]-*/**/TODO.md
+[0-9][0-9]-*/**/todo.md
+[0-9][0-9]-*/**/IDEA.md
+[0-9][0-9]-*/**/STORYBOARD.md
 
-# Binary files - all episodes (notebooklm + numbered episodes)
-notebooklm/**/*.mp4
-notebooklm/**/*.mov
-notebooklm/**/*.avi
-notebooklm/**/*.mkv
-notebooklm/**/*.flv
-notebooklm/**/*.wmv
-notebooklm/**/*.mp3
-notebooklm/**/*.MP3
-notebooklm/**/*.wav
-notebooklm/**/*.WAV
-notebooklm/**/*.m4a
-notebooklm/**/*.aac
-notebooklm/**/*.screenflow/
-notebooklm/**/*.jpg
-notebooklm/**/*.jpeg
-notebooklm/**/*.png
-notebooklm/**/*.gif
-notebooklm/**/*.dat
-notebooklm/**/*.scc
-notebooklm/**/*.plist
+# Demo/test files (local only)
+[0-9][0-9]-*/**/*_paths.txt
+[0-9][0-9]-*/**/create_demo*.sh
+[0-9][0-9]-*/**/test_demo*.sh
+
+# Binary/media files
 [0-9][0-9]-*/**/*.mp4
 [0-9][0-9]-*/**/*.mov
 [0-9][0-9]-*/**/*.avi
@@ -105,3 +95,35 @@ notebooklm/**/*.plist
 [0-9][0-9]-*/**/*.dat
 [0-9][0-9]-*/**/*.scc
 [0-9][0-9]-*/**/*.plist
+
+# ===========================================
+# notebooklm/ (legacy episode, same rules)
+# ===========================================
+notebooklm/downloads/
+notebooklm/aigc/
+notebooklm/sample/
+notebooklm/capcut/
+notebooklm/recording/
+notebooklm/output/
+notebooklm/**/*Checklist.md
+notebooklm/**/*脚本.md
+notebooklm/**/*.mp4
+notebooklm/**/*.mov
+notebooklm/**/*.avi
+notebooklm/**/*.mkv
+notebooklm/**/*.flv
+notebooklm/**/*.wmv
+notebooklm/**/*.mp3
+notebooklm/**/*.MP3
+notebooklm/**/*.wav
+notebooklm/**/*.WAV
+notebooklm/**/*.m4a
+notebooklm/**/*.aac
+notebooklm/**/*.screenflow/
+notebooklm/**/*.jpg
+notebooklm/**/*.jpeg
+notebooklm/**/*.png
+notebooklm/**/*.gif
+notebooklm/**/*.dat
+notebooklm/**/*.scc
+notebooklm/**/*.plist
