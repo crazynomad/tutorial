@@ -24,6 +24,24 @@ ProductTalk 文章对 Claude Code 的定位与本期视频高度契合：**Claud
 
 ## 修订后的分镜
 
+### Scene 02B: 文档智能 + 文件管家演示 — 录屏
+
+> 插入位置：Scene 02 之后、原理讲解之前
+> 过渡逻辑：清理和整理"自己也能干" → 但 4000+ PPT / 14000+ PDF 的内容解读和分类"一直不敢面对" → 文档智能 Skill 解决这个大难题
+
+| 画面 | 旁白 |
+|------|------|
+| 过渡：从 Scene 02 结尾自然衔接 | "前面的清理和整理，不怕辛苦自己也能干。但 4000 多份 PPT、14000 多份 PDF 的内容分类，这件事困扰我好多年了" |
+| 录屏：触发 doc-mindmap Skill | "文档智能整理助手，就是来解决这个大难题的" |
+| 录屏：PDF → Markdown 批量转换 | "先把 PDF 批量转成 Markdown" |
+| 录屏：Ollama 本地摘要 | "然后用本地 AI 生成摘要，文件不会上传到任何地方" |
+| 录屏：分类 + 重命名结果 | "三个维度自动分类，还能智能重命名" |
+| 录屏：思维导图 | "最后生成思维导图，快速理解一堆文件在讲什么" |
+| 录屏：触发 file-master | "file-master 把三个步骤串联起来，一句话启动，三步自动完成" |
+| 录屏：三阶段自动执行 | "清、理、知，全自动" |
+
+---
+
 ### Scene 05: 原理讲解 (9:00 - 10:00)
 
 > 主题转变：从单纯讲 Mole → **讲清楚"为什么 Claude Code 能做到这些"**
@@ -41,13 +59,25 @@ ProductTalk 文章对 Claude Code 的定位与本期视频高度契合：**Claud
 |------|------|
 | Mole 中心节点 → 5个功能分支弹出 | "它知道 macOS 上哪些缓存可以安全删除" |
 
-#### 5.3 三层架构图 (9:35 - 9:50) — Remotion `SkillArchitecture` ✅ 已完成
+#### 5.3 文档智能放射图 (9:25 - 9:35) — Remotion `DocMindmapFeatures` ✅ 已完成
+
+| 画面 | 旁白 |
+|------|------|
+| doc-mindmap 中心节点 → 5个功能分支弹出 | "文档智能这边，核心是 doc-mindmap。它能把文档转 Markdown，用 Ollama 做摘要，自动分类、重命名、生成思维导图" |
+
+#### 5.4 三层架构图 (9:35 - 9:50) — Remotion `SkillArchitecture` ✅ 已更新
 
 | 画面 | 旁白 | 关键改动 |
 |------|------|---------|
-| 用户 → Claude Code(Skill) → Mole | "Skill 只是中间的翻译层" | 增加旁白强调"你说人话，Skill 翻译成命令" |
+| 用户 → Claude Code(Skill) → Mole / Ollama / macOS (3个并列底层节点扇出) | "这些底层工具普通人都不会用，Skill 是中间的翻译层" | 底层从单个 Mole → 3 个并列节点，箭头扇出 |
 
-#### 5.4 开源生态 (9:50 - 10:00) — Remotion `OpenSourceEco` ✅ 已完成
+#### 5.5 三阶段流水线 (9:45 - 9:55) — Remotion `FileMasterPipeline` ✅ 已完成
+
+| 画面 | 旁白 |
+|------|------|
+| 🧹清 → 📂理 → 🧠知 三阶段卡片水平排列 + 箭头连线 | "file-master 更进一步，把清理、整理、文档智能串成流水线。一句话启动，三步自动完成" |
+
+#### 5.6 开源生态 (9:55 - 10:00) — Remotion `OpenSourceEco` ✅ 已完成
 
 | 画面 | 旁白 |
 |------|------|
@@ -114,20 +144,16 @@ ProductTalk 文章对 Claude Code 的定位与本期视频高度契合：**Claud
 
 ## Remotion 制作计划
 
-### 现有动画（无需修改）
+### 现有动画
 
 | Composition | 场景 | 状态 |
 |-------------|------|------|
-| MoleFeatures | 5.2 | ✅ |
-| SkillArchitecture | 5.3 | ✅ |
-| OpenSourceEco | 5.4 | ✅ |
-
-### 需要新制作
-
-| Composition | 场景 | 时长 | 描述 |
-|-------------|------|------|------|
-| **CloudVsLocal** | 6.1–6.3 | 70s (2100帧) | 三组左右分屏对比，每组 ~23s，共享同一个 Composition 按时间线切换 |
-| **TaglineEnding** | 6.4 | 20s (600帧) | 金句三行逐行入场 |
+| MoleFeatures | 5.2 | ✅ 无需修改 |
+| DocMindmapFeatures | 5.3 | ✅ 新增 |
+| SkillArchitecture | 5.4 | ✅ 已更新（底层扇出为 Mole/Ollama/macOS 三节点） |
+| FileMasterPipeline | 5.5 | ✅ 新增 |
+| OpenSourceEco | 5.6 | ✅ 无需修改 |
+| CloudVsLocal | 6.1–6.3 | ✅ 已完成 |
 
 > 也可以将 CloudVsLocal 拆成 3 个独立 Composition（`CompareFileAccess` / `CompareExecution` / `CompareReuse`），方便剪辑时灵活调整顺序和时长。
 
@@ -149,9 +175,13 @@ ProductTalk 文章对 Claude Code 的定位与本期视频高度契合：**Claud
 >
 > 9:20 "它有 clean、analyze、purge 等一系列命令，知道 macOS 上哪些缓存可以安全删除。"
 >
-> 9:35 "但 Mole 是个命令行工具，普通人不会用。这就是 Skill 的价值——它是中间的翻译层。你说人话，Skill 翻译成 Mole 的命令。"
+> 9:25 "文档智能这边呢，核心是 doc-mindmap。它能把各种格式的文档转成 Markdown，用本地 Ollama 做摘要，还能自动分类、重命名、生成思维导图。"
 >
-> 9:50 "这就是 Claude Code 的魔力：它把大神的开源工具，通过 Skill 包装，让普通人也能一句话调用。你不需要会写代码，只需要能清楚地描述你要做什么。"
+> 9:35 "但这些底层工具——Mole、Ollama、macOS 原生命令——普通人都不会用。这就是 Skill 的价值——它是中间的翻译层。你说人话，Skill 翻译成底层工具的命令。"
+>
+> 9:45 "而 file-master 更进一步，它把清理、整理、文档智能三个步骤串成一条流水线。一句话启动，三步自动完成。"
+>
+> 9:55 "这就是 Claude Code 的魔力：它把大神的开源工具，通过 Skill 包装，让普通人也能一句话调用。你不需要会写代码，只需要能清楚地描述你要做什么。"
 
 ### Scene 06 (10:00 - 11:30)
 
