@@ -1,129 +1,35 @@
-# Software binaries and large files
-software/*.dmg
-software/*.iso
-software/*.exe
-software/*.zip
-software/*.tar.gz
-software/*.app
-software/*.pkg
-
-# Video files
-software/*.mp4
-software/*.mov
-software/*.avi
-software/*.mkv
-software/*.flv
-software/*.wmv
-
 # macOS
 .DS_Store
-.AppleDouble
-.LSOverride
-
-# Thumbnails
 ._*
 
-# Remotion projects
-**/remotion-*/
+# Node / Remotion
 **/node_modules/
 **/out/
+**/remotion-*/
+!**/remotion-*/src/
 
 # AI coding assistants local settings
 .claude/
-.agent/
-.agents/
-.codex/
 .cursor/
-.gemini/
-.opencode/
-.windsurf/
-
-# Tutorial videos and large media
-software/ScreenFlow教程/*
-!software/ScreenFlow教程/README.md
-
-# Only track README files in software folder
-software/*
-!software/README.md
-!software/.gitkeep
-
-# ===========================================
-# Tutorial Episode directories ([0-9][0-9]-*)
-# Matches: 02-podcast-downloader, 03-disk-cleaner, 04-*, etc.
-# ===========================================
+.github/
 
 # Production directories (not tracked)
-[0-9][0-9]-*/downloads/
-[0-9][0-9]-*/aigc/
-[0-9][0-9]-*/sample/
-[0-9][0-9]-*/capcut/
-[0-9][0-9]-*/recording/
-[0-9][0-9]-*/output/
-
-# Private scripts and checklists
-[0-9][0-9]-*/**/*Checklist.md
-[0-9][0-9]-*/**/*checklist.md
-[0-9][0-9]-*/**/*脚本.md
-[0-9][0-9]-*/**/TODO.md
-[0-9][0-9]-*/**/todo.md
-[0-9][0-9]-*/**/IDEA.md
-[0-9][0-9]-*/**/STORYBOARD.md
-
-# Demo/test files (local only)
-[0-9][0-9]-*/**/*_paths.txt
-[0-9][0-9]-*/**/create_demo*.sh
-[0-9][0-9]-*/**/test_demo*.sh
+03-disk-cleaner/downloads/
+03-disk-cleaner/aigc/
+03-disk-cleaner/sample/
+03-disk-cleaner/capcut/
+03-disk-cleaner/recording/
+03-disk-cleaner/output/
 
 # Binary/media files
-[0-9][0-9]-*/**/*.mp4
-[0-9][0-9]-*/**/*.mov
-[0-9][0-9]-*/**/*.avi
-[0-9][0-9]-*/**/*.mkv
-[0-9][0-9]-*/**/*.flv
-[0-9][0-9]-*/**/*.wmv
-[0-9][0-9]-*/**/*.mp3
-[0-9][0-9]-*/**/*.MP3
-[0-9][0-9]-*/**/*.wav
-[0-9][0-9]-*/**/*.WAV
-[0-9][0-9]-*/**/*.m4a
-[0-9][0-9]-*/**/*.aac
-[0-9][0-9]-*/**/*.screenflow/
-[0-9][0-9]-*/**/*.jpg
-[0-9][0-9]-*/**/*.jpeg
-[0-9][0-9]-*/**/*.png
-[0-9][0-9]-*/**/*.gif
-[0-9][0-9]-*/**/*.dat
-[0-9][0-9]-*/**/*.scc
-[0-9][0-9]-*/**/*.plist
-
-# ===========================================
-# notebooklm/ (legacy episode, same rules)
-# ===========================================
-notebooklm/downloads/
-notebooklm/aigc/
-notebooklm/sample/
-notebooklm/capcut/
-notebooklm/recording/
-notebooklm/output/
-notebooklm/**/*Checklist.md
-notebooklm/**/*脚本.md
-notebooklm/**/*.mp4
-notebooklm/**/*.mov
-notebooklm/**/*.avi
-notebooklm/**/*.mkv
-notebooklm/**/*.flv
-notebooklm/**/*.wmv
-notebooklm/**/*.mp3
-notebooklm/**/*.MP3
-notebooklm/**/*.wav
-notebooklm/**/*.WAV
-notebooklm/**/*.m4a
-notebooklm/**/*.aac
-notebooklm/**/*.screenflow/
-notebooklm/**/*.jpg
-notebooklm/**/*.jpeg
-notebooklm/**/*.png
-notebooklm/**/*.gif
-notebooklm/**/*.dat
-notebooklm/**/*.scc
-notebooklm/**/*.plist
+*.mp4
+*.mov
+*.mp3
+*.wav
+*.m4a
+*.aac
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.screenflow/
