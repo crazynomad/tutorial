@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>绿皮火车 — 3D 文字对齐工具</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #1a1a1a;
+    color: #eee;
+    font-family: -apple-system, 'Helvetica Neue', sans-serif;
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── 控制面板 ── */
+  .controls {
+    background: #222;
+    border-bottom: 1px solid #444;
+    padding: 12px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+    z-index: 100;
+    min-height: 60px;
+  }
+
+  .ctrl-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .ctrl-group label {
+    font-size: 12px;
+    color: #aaa;
+    min-width: 70px;
+    text-align: right;
+  }
+
+  .ctrl-group input[type="range"] {
+    width: 120px;
+    accent-color: #d97757;
+  }
+
+  .ctrl-group .val {
+    font-size: 12px;
+    font-family: 'SF Mono', 'Menlo', monospace;
+    color: #d97757;
+    min-width: 55px;
+  }
+
+  .ctrl-section {
+    display: flex;
+    gap: 14px;
+    padding: 4px 12px;
+    border: 1px solid #333;
+    border-radius: 6px;
+  }
+
+  .ctrl-section-title {
+    font-size: 11px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    writing-mode: vertical-lr;
+    margin-right: 4px;
+  }
+
+  .ctrl-section-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  /* ── 输出面板 ── */
+  .output-bar {
+    background: #181818;
+    border-top: 1px solid #444;
+    padding: 8px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 100;
+  }
+
+  .output-bar code {
+    font-family: 'SF Mono', 'Menlo', monospace;
+    font-size: 12px;
+    color: #7ec699;
+    background: #111;
+    padding: 6px 12px;
+    border-radius: 4px;
+    flex: 1;
+    user-select: all;
+    cursor: text;
+    white-space: nowrap;
+    overflow-x: auto;
+  }
+
+  .output-bar button {
+    background: #d97757;
+    color: #fff;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .output-bar button:hover { background: #c06645; }
+
+  /* ── 画布区 ── */
+  .canvas-area {
+    flex: 1;
+    overflow: auto;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .canvas-wrap {
+    position: relative;
+    transform-origin: 0 0;
+  }
+
+  .canvas-wrap img {
+    display: block;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  /* ── 3D 文字层 ── */
+  .board-wrapper {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    pointer-events: none;
+    /* 用红色虚线辅助对齐 */
+    border: 1px dashed rgba(255, 0, 0, 0.5);
+  }
+
+  .board-wrapper.hide-guide {
+    border-color: transparent;
+  }
+
+  /* 十字准星标记锚点 */
+  .crosshair {
+    position: absolute;
+    width: 20px; height: 20px;
+    pointer-events: none;
+    z-index: 50;
+  }
+  .crosshair::before, .crosshair::after {
+    content: '';
+    position: absolute;
+    background: rgba(255, 0, 0, 0.6);
+  }
+  .crosshair::before {
+    width: 1px; height: 100%;
+    left: 50%; top: 0;
+  }
+  .crosshair::after {
+    width: 100%; height: 1px;
+    top: 50%; left: 0;
+  }
+
+  .main-slogan {
+    font-family: 'Songti SC', 'STSong', 'Noto Serif SC', serif;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    text-align: center;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .dot {
+    display: inline-block;
+    margin: 0 5px;
+    font-size: 0.65em;
+    vertical-align: middle;
+  }
+
+  .sub-line {
+    font-family: 'Songti SC', 'STSong', serif;
+    font-weight: 400;
+    letter-spacing: 0.25em;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  /* ── 快捷键提示 ── */
+  .hotkeys {
+    position: fixed;
+    bottom: 50px;
+    right: 16px;
+    background: rgba(0,0,0,0.75);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    color: #888;
+    line-height: 1.8;
+    z-index: 200;
+  }
+  .hotkeys kbd {
+    background: #333;
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: #ccc;
+    font-family: 'SF Mono', monospace;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── 控制面板 ── -->
+<div class="controls" id="controls">
+  <!-- Position -->
+  <div class="ctrl-section">
+    <div class="ctrl-section-title">位置</div>
+    <div class="ctrl-section-body">
+      <div class="ctrl-group">
+        <label>X</label>
+        <input type="range" id="posX" min="800" max="2200" value="1462" step="1">
+        <span class="val" id="posX-val">1462</span>
+      </div>
+      <div class="ctrl-group">
+        <label>Y</label>
+        <input type="range" id="posY" min="600" max="1400" value="1020" step="1">
+        <span class="val" id="posY-val">1020</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Size -->
+  <div class="ctrl-section">
+    <div class="ctrl-section-title">尺寸</div>
+    <div class="ctrl-section-body">
+      <div class="ctrl-group">
+        <label>宽</label>
+        <input type="range" id="boxW" min="100" max="600" value="300" step="2">
+        <span class="val" id="boxW-val">300</span>
+      </div>
+      <div class="ctrl-group">
+        <label>高</label>
+        <input type="range" id="boxH" min="40" max="300" value="130" step="2">
+        <span class="val" id="boxH-val">130</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3D Rotation -->
+  <div class="ctrl-section">
+    <div class="ctrl-section-title">旋转</div>
+    <div class="ctrl-section-body">
+      <div class="ctrl-group">
+        <label>rotateY</label>
+        <input type="range" id="rotY" min="-60" max="60" value="-30" step="0.5">
+        <span class="val" id="rotY-val">-30°</span>
+      </div>
+      <div class="ctrl-group">
+        <label>rotateX</label>
+        <input type="range" id="rotX" min="-30" max="30" value="6" step="0.5">
+        <span class="val" id="rotX-val">6°</span>
+      </div>
+      <div class="ctrl-group">
+        <label>rotateZ</label>
+        <input type="range" id="rotZ" min="-20" max="20" value="0" step="0.5">
+        <span class="val" id="rotZ-val">0°</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Perspective & Skew -->
+  <div class="ctrl-section">
+    <div class="ctrl-section-title">透视</div>
+    <div class="ctrl-section-body">
+      <div class="ctrl-group">
+        <label>perspective</label>
+        <input type="range" id="persp" min="200" max="3000" value="600" step="10">
+        <span class="val" id="persp-val">600</span>
+      </div>
+      <div class="ctrl-group">
+        <label>skewY</label>
+        <input type="range" id="skewY" min="-15" max="15" value="2" step="0.5">
+        <span class="val" id="skewY-val">2°</span>
+      </div>
+      <div class="ctrl-group">
+        <label>origin-X</label>
+        <input type="range" id="originX" min="0" max="100" value="40" step="1">
+        <span class="val" id="originX-val">40%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Text -->
+  <div class="ctrl-section">
+    <div class="ctrl-section-title">文字</div>
+    <div class="ctrl-section-body">
+      <div class="ctrl-group">
+        <label>字号</label>
+        <input type="range" id="fontSize" min="12" max="60" value="28" step="1">
+        <span class="val" id="fontSize-val">28px</span>
+      </div>
+      <div class="ctrl-group">
+        <label>副标题</label>
+        <input type="range" id="subSize" min="8" max="30" value="13" step="1">
+        <span class="val" id="subSize-val">13px</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 画布 ── -->
+<div class="canvas-area" id="canvasArea">
+  <div class="canvas-wrap" id="canvasWrap">
+    <img id="bgImg" src="green-train-side-cabin-notext.png" alt="">
+
+    <!-- 锚点十字 -->
+    <div class="crosshair" id="crosshair"></div>
+
+    <!-- 3D 文字 -->
+    <div class="board-wrapper" id="board">
+      <div class="main-slogan" id="mainText">听得懂<span class="dot">·</span>学得会<span class="dot">·</span>用得上</div>
+      <div class="sub-line" id="subText">AI FOR EVERYONE</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 输出 ── -->
+<div class="output-bar">
+  <span style="font-size:12px;color:#888;">参数 →</span>
+  <code id="outputCode">...</code>
+  <button onclick="copyOutput()">复制</button>
+  <label style="font-size:12px;color:#666;display:flex;align-items:center;gap:4px;">
+    <input type="checkbox" id="toggleGuide" checked> 辅助线
+  </label>
+</div>
+
+<!-- ── 快捷键 ── -->
+<div class="hotkeys">
+  <kbd>滚轮</kbd> 缩放画布 &nbsp;
+  <kbd>拖拽</kbd> 平移画布 &nbsp;
+  <kbd>G</kbd> 切换辅助线
+</div>
+
+<script>
+// ── State ──
+const state = {
+  posX: 1484, posY: 1015,
+  boxW: 300, boxH: 130,
+  rotY: -3.5, rotX: 2, rotZ: -6,
+  persp: 860, skewY: 2, originX: 86,
+  fontSize: 35, subSize: 19,
+};
+
+const ids = Object.keys(state);
+const els = {};
+const valEls = {};
+
+ids.forEach(id => {
+  els[id] = document.getElementById(id);
+  valEls[id] = document.getElementById(id + '-val');
+});
+
+const board = document.getElementById('board');
+const crosshair = document.getElementById('crosshair');
+const mainText = document.getElementById('mainText');
+const subText = document.getElementById('subText');
+const outputCode = document.getElementById('outputCode');
+const canvasArea = document.getElementById('canvasArea');
+const canvasWrap = document.getElementById('canvasWrap');
+const bgImg = document.getElementById('bgImg');
+const toggleGuide = document.getElementById('toggleGuide');
+
+// ── Render ──
+function render() {
+  const { posX, posY, boxW, boxH, rotY, rotX, rotZ, persp, skewY, originX, fontSize, subSize } = state;
+
+  // Board div
+  board.style.left = posX + 'px';
+  board.style.top = posY + 'px';
+  board.style.width = boxW + 'px';
+  board.style.height = boxH + 'px';
+  board.style.marginLeft = (-boxW / 2) + 'px';
+  board.style.marginTop = (-boxH / 2) + 'px';
+  board.style.transform = `perspective(${persp}px) rotateY(${rotY}deg) rotateX(${rotX}deg) rotateZ(${rotZ}deg) skewY(${skewY}deg)`;
+  board.style.transformOrigin = `${originX}% 50%`;
+
+  // Crosshair at anchor point
+  crosshair.style.left = (posX - 10) + 'px';
+  crosshair.style.top = (posY - 10) + 'px';
+
+  // Text sizes
+  mainText.style.fontSize = fontSize + 'px';
+  mainText.style.color = '#2c2418';
+  subText.style.fontSize = subSize + 'px';
+  subText.style.color = '#6b5d50';
+
+  // Dot size follows main
+  document.querySelectorAll('.dot').forEach(d => {
+    d.style.fontSize = Math.round(fontSize * 0.65) + 'px';
+    d.style.color = '#9a7a55';
+  });
+
+  // Update display values
+  valEls.posX.textContent = posX;
+  valEls.posY.textContent = posY;
+  valEls.boxW.textContent = boxW;
+  valEls.boxH.textContent = boxH;
+  valEls.rotY.textContent = rotY + '°';
+  valEls.rotX.textContent = rotX + '°';
+  valEls.rotZ.textContent = rotZ + '°';
+  valEls.persp.textContent = persp;
+  valEls.skewY.textContent = skewY + '°';
+  valEls.originX.textContent = originX + '%';
+  valEls.fontSize.textContent = fontSize + 'px';
+  valEls.subSize.textContent = subSize + 'px';
+
+  // Output string
+  outputCode.textContent = JSON.stringify({
+    posX, posY, boxW, boxH,
+    rotateY: rotY, rotateX: rotX, rotateZ: rotZ,
+    perspective: persp, skewY, originX,
+    fontSize, subSize
+  });
+}
+
+// ── Bind sliders ──
+ids.forEach(id => {
+  els[id].addEventListener('input', () => {
+    state[id] = parseFloat(els[id].value);
+    render();
+  });
+});
+
+// ── Guide toggle ──
+toggleGuide.addEventListener('change', () => {
+  board.classList.toggle('hide-guide', !toggleGuide.checked);
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'g' || e.key === 'G') {
+    toggleGuide.checked = !toggleGuide.checked;
+    board.classList.toggle('hide-guide', !toggleGuide.checked);
+  }
+});
+
+// ── Copy ──
+function copyOutput() {
+  navigator.clipboard.writeText(outputCode.textContent);
+  event.target.textContent = '已复制 ✓';
+  setTimeout(() => event.target.textContent = '复制', 1500);
+}
+
+// ── Canvas zoom & pan ──
+let zoom = 0.5;  // start at 50% to fit the large image
+let panX = 0, panY = 0;
+let isPanning = false, panStartX, panStartY;
+
+function updateCanvasTransform() {
+  canvasWrap.style.transform = `scale(${zoom}) translate(${panX}px, ${panY}px)`;
+}
+
+canvasArea.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const delta = e.deltaY > 0 ? 0.95 : 1.05;
+  zoom = Math.max(0.1, Math.min(3, zoom * delta));
+  updateCanvasTransform();
+}, { passive: false });
+
+canvasArea.addEventListener('mousedown', (e) => {
+  if (e.target === bgImg || e.target === canvasArea) {
+    isPanning = true;
+    panStartX = e.clientX - panX * zoom;
+    panStartY = e.clientY - panY * zoom;
+    canvasArea.style.cursor = 'grabbing';
+  }
+});
+
+window.addEventListener('mousemove', (e) => {
+  if (isPanning) {
+    panX = (e.clientX - panStartX) / zoom;
+    panY = (e.clientY - panStartY) / zoom;
+    updateCanvasTransform();
+  }
+});
+
+window.addEventListener('mouseup', () => {
+  isPanning = false;
+  canvasArea.style.cursor = '';
+});
+
+// ── Init ──
+render();
+updateCanvasTransform();
+</script>
+</body>
+</html>

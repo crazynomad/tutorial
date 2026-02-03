@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>文件归档映射 — Before / After</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #131314;
+    --cream: #faf9f0;
+    --terracotta: #d97757;
+    --terracotta-light: #e8a08a;
+    --warm-gray: #9c958b;
+    --light-gray: #e8e4db;
+    --subtle-gray: #f3f0e8;
+    --green: #6b9e78;
+    --blue: #7a9bb5;
+    --purple: #9b8bb5;
+    --gold: #c9a84c;
+    --red-muted: #c4665a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Crimson Pro', 'Noto Serif SC', serif;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem;
+  }
+
+  .canvas {
+    width: 1920px;
+    height: 1080px;
+    background: var(--cream);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 52px 80px 44px;
+  }
+
+  .canvas::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 15% 30%, rgba(217, 119, 87, 0.035) 0%, transparent 50%),
+      radial-gradient(ellipse at 85% 70%, rgba(107, 158, 120, 0.03) 0%, transparent 45%);
+    pointer-events: none;
+  }
+
+  .canvas::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 80px;
+    right: 80px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--light-gray), transparent);
+  }
+
+  .corner {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-color: var(--light-gray);
+    border-style: solid;
+  }
+  .corner.tl { top: 32px; left: 48px; border-width: 1px 0 0 1px; }
+  .corner.tr { top: 32px; right: 48px; border-width: 1px 1px 0 0; }
+  .corner.bl { bottom: 32px; left: 48px; border-width: 0 0 1px 1px; }
+  .corner.br { bottom: 32px; right: 48px; border-width: 0 1px 1px 0; }
+
+  /* ── Header ── */
+  .header {
+    text-align: center;
+    margin-bottom: 36px;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .header h1 {
+    font-family: 'Playfair Display', 'Noto Serif SC', serif;
+    font-size: 54px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+
+  .header h1 em {
+    font-style: italic;
+    color: var(--terracotta);
+    font-family: 'Playfair Display', serif;
+  }
+
+  .header .subtitle {
+    font-family: 'Crimson Pro', serif;
+    font-size: 20px;
+    font-weight: 300;
+    color: var(--warm-gray);
+    margin-top: 8px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-style: italic;
+  }
+
+  /* ── Main comparison ── */
+  .comparison {
+    display: grid;
+    grid-template-columns: 1fr 100px 1fr;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* ── Left: Before ── */
+  .before {
+    display: flex;
+    flex-direction: column;
+    padding-right: 20px;
+  }
+
+  .section-label {
+    font-family: 'Crimson Pro', serif;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+    border-bottom: 1.5px solid var(--light-gray);
+  }
+
+  .before .section-label {
+    color: var(--warm-gray);
+    text-align: center;
+  }
+
+  .after .section-label {
+    color: var(--ink);
+    text-align: center;
+  }
+
+  .file-pile {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    overflow: hidden;
+  }
+
+  .file-item {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    font-weight: 400;
+    color: var(--warm-gray);
+    padding: 3.5px 10px;
+    border-radius: 4px;
+    background: rgba(19, 19, 20, 0.025);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.5;
+    position: relative;
+  }
+
+  .file-item .tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    font-family: 'Crimson Pro', serif;
+    letter-spacing: 0.05em;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-left: 6px;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+  }
+
+  .tag.hash { background: rgba(196, 102, 90, 0.12); color: var(--red-muted); }
+  .tag.num { background: rgba(201, 168, 76, 0.15); color: #a08930; }
+  .tag.ver { background: rgba(122, 155, 181, 0.15); color: var(--blue); }
+  .tag.date { background: rgba(155, 139, 181, 0.12); color: var(--purple); }
+  .tag.abbr { background: rgba(19, 19, 20, 0.06); color: var(--warm-gray); }
+
+  /* ── Center arrow ── */
+  .center-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .arrow-line {
+    width: 1px;
+    height: 80px;
+    background: linear-gradient(180deg, var(--light-gray), var(--terracotta-light), var(--light-gray));
+  }
+
+  .arrow-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--terracotta);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(217, 119, 87, 0.25);
+  }
+
+  .arrow-icon svg {
+    width: 28px;
+    height: 28px;
+    stroke: var(--cream);
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .arrow-label {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--terracotta);
+    writing-mode: vertical-rl;
+    letter-spacing: 0.15em;
+  }
+
+  /* ── Right: After ── */
+  .after {
+    display: flex;
+    flex-direction: column;
+    padding-left: 20px;
+  }
+
+  .tree {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow: hidden;
+  }
+
+  .tree-branch {
+    margin-bottom: 2px;
+  }
+
+  .tree-branch-header {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tree-branch-header .folder-icon {
+    font-size: 16px;
+  }
+
+  .tree-branch-header .dim-label {
+    font-family: 'Crimson Pro', serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--warm-gray);
+    font-style: italic;
+    margin-left: 4px;
+  }
+
+  .tree-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 6px;
+    padding-left: 26px;
+  }
+
+  .tree-file {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 12px;
+    white-space: nowrap;
+  }
+
+  .tree-file.topic { background: rgba(155, 139, 181, 0.12); color: #7a6ba5; }
+  .tree-file.usage { background: rgba(122, 155, 181, 0.12); color: #5f8aaa; }
+  .tree-file.client { background: rgba(107, 158, 120, 0.12); color: #508060; }
+
+  .tree-sub {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 6px;
+    padding-left: 26px;
+    margin-top: 3px;
+  }
+
+  .tree-sub-folder {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    padding: 2px 10px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .tree-sub-folder .count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: white;
+    background: var(--warm-gray);
+    border-radius: 8px;
+    padding: 0 6px;
+    min-width: 20px;
+    text-align: center;
+  }
+
+  .tree-sub-folder.t .count { background: var(--purple); }
+  .tree-sub-folder.u .count { background: var(--blue); }
+  .tree-sub-folder.c .count { background: var(--green); }
+
+  /* ── Bottom stats ── */
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    margin-top: 20px;
+    padding-top: 18px;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .stats-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 120px;
+    right: 120px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--light-gray), transparent);
+  }
+
+  .stat {
+    text-align: center;
+  }
+
+  .stat-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--terracotta);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--warm-gray);
+    margin-top: 4px;
+  }
+
+  /* ── Sample mapping rows ── */
+  .mapping-samples {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+
+  .mapping-row {
+    display: grid;
+    grid-template-columns: 1fr 28px 1fr;
+    align-items: center;
+    gap: 0;
+  }
+
+  .mapping-from {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    color: var(--warm-gray);
+    text-align: right;
+    padding-right: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-decoration: line-through;
+    text-decoration-color: rgba(156, 149, 139, 0.3);
+  }
+
+  .mapping-arrow {
+    text-align: center;
+    color: var(--terracotta);
+    font-size: 14px;
+  }
+
+  .mapping-to {
+    font-family: 'JetBrains Mono', 'Noto Serif SC', monospace;
+    font-size: 12.5px;
+    color: var(--ink);
+    font-weight: 500;
+    padding-left: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="corner tl"></div>
+  <div class="corner tr"></div>
+  <div class="corner bl"></div>
+  <div class="corner br"></div>
+
+  <!-- Header -->
+  <div class="header">
+    <h1>28 份 PPT，<em>从混乱到有序</em></h1>
+    <div class="subtitle">doc-mindmap &mdash; AI-Powered File Organization Pipeline</div>
+  </div>
+
+  <!-- Main comparison -->
+  <div class="comparison">
+
+    <!-- LEFT: Before -->
+    <div class="before">
+      <div class="section-label">~/Desktop/PPT/ &nbsp; &mdash; &nbsp; Before</div>
+
+      <div class="file-pile">
+        <div class="file-item">~$ct2ifrqzccgh1zk (1).pptx <span class="tag hash">乱码</span></div>
+        <div class="file-item">ct2ifrqzccgh1zk (1).pptx <span class="tag hash">乱码</span></div>
+        <div class="file-item">tmpbusc_qc9.pptx <span class="tag hash">乱码</span></div>
+        <div class="file-item">mck_restructured_v1.pptx <span class="tag hash">乱码</span></div>
+        <div class="file-item">AI (1).pptx <span class="tag num">编号</span></div>
+        <div class="file-item">AI (2).pptx <span class="tag num">编号</span></div>
+        <div class="file-item">1、小狮子招标答疑文件-DPAD.pptx <span class="tag num">编号</span></div>
+        <div class="file-item">1、招标答疑文件-DPAD.pptx <span class="tag num">编号</span></div>
+        <div class="file-item">1  OneID方案最终_V6展开版.pptx <span class="tag ver">版本</span></div>
+        <div class="file-item">【四轮百科】全链路数字化解决方案V3.0_0920.pptx <span class="tag ver">版本</span></div>
+        <div class="file-item">01 Essential SAFe Overview… (6.0).pptx <span class="tag ver">版本</span></div>
+        <div class="file-item">01 Introduction to LPM… (V5.1).pptx <span class="tag ver">版本</span></div>
+        <div class="file-item">【0507】飞天8号专区-.pptx <span class="tag date">日期</span></div>
+        <div class="file-item">【课程3】智慧网销0818 (1).pptx <span class="tag date">日期</span></div>
+        <div class="file-item">彩虹独角兽-汽车事业部介绍-20251111.pptx <span class="tag date">日期</span></div>
+        <div class="file-item">智能新媒体产品介绍1229.pptx <span class="tag date">日期</span></div>
+        <div class="file-item">DMS.pptx <span class="tag abbr">缩写</span></div>
+        <div class="file-item">章鱼云.pptx <span class="tag abbr">缩写</span></div>
+        <div class="file-item">GenAI-Training-PO.pptx <span class="tag abbr">缩写</span></div>
+        <div class="file-item">1.7&3.2 产品资料更新(1).pptx</div>
+        <div class="file-item">1.7在开发研发项目清单 (1).pptx</div>
+        <div class="file-item">PolarBear-BI-2026-2028.pptx</div>
+        <div class="file-item">KPI改进思路和团队配置.pptx</div>
+        <div class="file-item">C端数字化能力规划.pptx</div>
+        <div class="file-item">彩虹独角兽公司介绍及汽车行业能力简介…</div>
+        <div class="file-item">彩虹独角兽智能化体系建设与合作建议.pptx</div>
+        <div class="file-item">【数说金丝雀-监测&预警】企业品牌…(1).pptx</div>
+        <div class="file-item">【汽车行业】案例集.pptx</div>
+      </div>
+    </div>
+
+    <!-- CENTER: Arrow -->
+    <div class="center-arrow">
+      <div class="arrow-line"></div>
+      <div class="arrow-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M5 12h14M13 6l6 6-6 6"/>
+        </svg>
+      </div>
+      <div class="arrow-label">四步流水线</div>
+      <div class="arrow-line"></div>
+    </div>
+
+    <!-- RIGHT: After -->
+    <div class="after">
+      <div class="section-label">schemes/ &nbsp; &mdash; &nbsp; After</div>
+
+      <div class="tree">
+        <!-- by-topic -->
+        <div class="tree-branch">
+          <div class="tree-branch-header">
+            <span class="folder-icon">🗂️</span> by-topic/
+            <span class="dim-label">21 个主题</span>
+          </div>
+          <div class="tree-sub">
+            <span class="tree-sub-folder t">营销策略 <span class="count">5</span></span>
+            <span class="tree-sub-folder t">项目管理 <span class="count">2</span></span>
+            <span class="tree-sub-folder t">数据治理 <span class="count">2</span></span>
+            <span class="tree-sub-folder t">AI产品管理 <span class="count">1</span></span>
+            <span class="tree-sub-folder t">AI技术 <span class="count">1</span></span>
+            <span class="tree-sub-folder t">AI应用 <span class="count">1</span></span>
+            <span class="tree-sub-folder t">产品改进 <span class="count">1</span></span>
+            <span class="tree-sub-folder t">产品管理 <span class="count">1</span></span>
+            <span class="tree-sub-folder t">工程化能力 <span class="count">1</span></span>
+            <span class="tree-sub-folder t">数据关联 <span class="count">1</span></span>
+            <span class="tree-sub-folder t">数据架构 <span class="count">1</span></span>
+            <span class="tree-sub-folder t">智能化体系 <span class="count">1</span></span>
+            <span class="tree-sub-folder t">智能运维 <span class="count">1</span></span>
+            <span class="tree-sub-folder t">数字化转型 <span class="count">1</span></span>
+            <span class="tree-sub-folder t">数智化应用 <span class="count">1</span></span>
+            <span class="tree-sub-folder t">数字化解决方案 <span class="count">1</span></span>
+            <span class="tree-sub-folder t">汽车行业 <span class="count">1</span></span>
+            <span class="tree-sub-folder t">制造业与汽车营销 <span class="count">1</span></span>
+            <span class="tree-sub-folder t">技术改进 <span class="count">1</span></span>
+            <span class="tree-sub-folder t">运维方案 <span class="count">1</span></span>
+            <span class="tree-sub-folder t">演示材料 <span class="count">1</span></span>
+          </div>
+        </div>
+
+        <!-- by-usage -->
+        <div class="tree-branch" style="margin-top: 10px;">
+          <div class="tree-branch-header">
+            <span class="folder-icon">📋</span> by-usage/
+            <span class="dim-label">3 个用途</span>
+          </div>
+          <div class="tree-sub">
+            <span class="tree-sub-folder u">内部参考 <span class="count">19</span></span>
+            <span class="tree-sub-folder u">培训材料 <span class="count">4</span></span>
+            <span class="tree-sub-folder u">市场营销 <span class="count">4</span></span>
+          </div>
+        </div>
+
+        <!-- by-client -->
+        <div class="tree-branch" style="margin-top: 10px;">
+          <div class="tree-branch-header">
+            <span class="folder-icon">🏢</span> by-client/
+            <span class="dim-label">4 个客户</span>
+          </div>
+          <div class="tree-sub">
+            <span class="tree-sub-folder c">通用方案 <span class="count">23</span></span>
+            <span class="tree-sub-folder c">北极熊 <span class="count">2</span></span>
+            <span class="tree-sub-folder c">银河汽车 <span class="count">1</span></span>
+            <span class="tree-sub-folder c">东方神兽 <span class="count">1</span></span>
+          </div>
+        </div>
+
+        <!-- Sample mappings -->
+        <div class="mapping-samples">
+          <div style="font-family: 'Crimson Pro', serif; font-size: 13px; color: var(--warm-gray); font-style: italic; margin-bottom: 6px; letter-spacing: 0.05em;">MAPPING EXAMPLES</div>
+          <div class="mapping-row">
+            <div class="mapping-from">ct2ifrqzccgh1zk (1).pptx</div>
+            <div class="mapping-arrow">&rarr;</div>
+            <div class="mapping-to">彩虹独角兽六大工程化能力体系</div>
+          </div>
+          <div class="mapping-row">
+            <div class="mapping-from">AI (1).pptx</div>
+            <div class="mapping-arrow">&rarr;</div>
+            <div class="mapping-to">AI驱动产品管理实战指南</div>
+          </div>
+          <div class="mapping-row">
+            <div class="mapping-from">mck_restructured_v1.pptx</div>
+            <div class="mapping-arrow">&rarr;</div>
+            <div class="mapping-to">C端触点整合用户数据管理策略</div>
+          </div>
+          <div class="mapping-row">
+            <div class="mapping-from">DMS.pptx</div>
+            <div class="mapping-arrow">&rarr;</div>
+            <div class="mapping-to">北极熊DMS三年优化运维方案</div>
+          </div>
+          <div class="mapping-row">
+            <div class="mapping-from">1、招标答疑文件-DPAD.pptx</div>
+            <div class="mapping-arrow">&rarr;</div>
+            <div class="mapping-to">闪电3000特别版车型提升方案</div>
+          </div>
+          <div class="mapping-row">
+            <div class="mapping-from">【0507】飞天8号专区-.pptx</div>
+            <div class="mapping-arrow">&rarr;</div>
+            <div class="mapping-to">飞天8号专区营销方案</div>
+          </div>
+          <div class="mapping-row">
+            <div class="mapping-from">智能新媒体产品介绍1229.pptx</div>
+            <div class="mapping-arrow">&rarr;</div>
+            <div class="mapping-to">银河汽车智能新媒体运营方案</div>
+          </div>
+          <div class="mapping-row">
+            <div class="mapping-from">1.7在开发研发项目清单 (1).pptx</div>
+            <div class="mapping-arrow">&rarr;</div>
+            <div class="mapping-to">数智化客户全生命周期管理</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom stats -->
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-number">28</div>
+      <div class="stat-label">原始文件</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">84</div>
+      <div class="stat-label">软链接归档</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">3</div>
+      <div class="stat-label">分类维度</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">21</div>
+      <div class="stat-label">主题类目</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">89%</div>
+      <div class="stat-label">文件名不可读</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

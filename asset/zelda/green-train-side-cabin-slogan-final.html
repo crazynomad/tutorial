@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>绿皮火车 — 车厢标牌（最终版）</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 2752px;
+    height: 1536px;
+    overflow: hidden;
+    position: relative;
+    background: #000;
+  }
+
+  .bg {
+    width: 2752px;
+    height: 1536px;
+    display: block;
+    position: absolute;
+    top: 0; left: 0;
+  }
+
+  .board-wrapper {
+    position: absolute;
+    left: 1513px;
+    top: 1021px;
+    width: 600px;
+    height: 220px;
+    margin-left: -300px;
+    margin-top: -110px;
+    z-index: 10;
+
+    transform: perspective(450px) rotateY(18deg) rotateX(-10.5deg) rotateZ(-6deg) skewY(1deg);
+    transform-origin: 56% 50%;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .main-slogan {
+    font-family: 'Songti SC', 'STSong', 'Noto Serif SC', serif;
+    font-weight: 900;
+    font-size: 35px;
+    color: #2c2418;
+    letter-spacing: 0.04em;
+    text-align: center;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .dot {
+    display: inline-block;
+    margin: 0 5px;
+    color: #9a7a55;
+    font-size: 23px;
+    vertical-align: middle;
+  }
+
+  .sub-line {
+    font-family: 'Songti SC', 'STSong', serif;
+    font-weight: 400;
+    font-size: 22px;
+    color: #6b5d50;
+    letter-spacing: 0.25em;
+    text-align: center;
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+<img class="bg" src="green-train-side-cabin-notext.png" alt="">
+
+<div class="board-wrapper">
+  <div class="main-slogan">听得懂<span class="dot">·</span>学得会<span class="dot">·</span>用得上</div>
+  <div class="sub-line">AI FOR EVERYONE</div>
+</div>
+
+</body>
+</html>

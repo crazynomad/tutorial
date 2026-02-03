@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>为什么用 Claude Code？</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=DM+Serif+Display&family=Source+Han+Serif+SC:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #131314;
+    --cream: #faf9f0;
+    --terracotta: #d97757;
+    --terracotta-light: #e8a08a;
+    --warm-gray: #9c958b;
+    --light-gray: #e8e4db;
+    --subtle-gray: #f3f0e8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Crimson Pro', 'Noto Serif SC', serif;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem;
+  }
+
+  .canvas {
+    width: 1920px;
+    height: 1080px;
+    background: var(--cream);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 120px;
+  }
+
+  /* Subtle texture overlay */
+  .canvas::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 75% 20%, rgba(217, 119, 87, 0.04) 0%, transparent 50%),
+      radial-gradient(ellipse at 20% 80%, rgba(217, 119, 87, 0.03) 0%, transparent 40%);
+    pointer-events: none;
+  }
+
+  /* Top decorative line */
+  .canvas::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 100px;
+    right: 100px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--light-gray), transparent);
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 64px;
+    position: relative;
+  }
+
+  .header h1 {
+    font-family: 'Playfair Display', 'Noto Serif SC', serif;
+    font-size: 72px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+
+  .header h1 em {
+    font-style: italic;
+    color: var(--terracotta);
+    font-family: 'Playfair Display', serif;
+  }
+
+  .header .subtitle {
+    font-family: 'Crimson Pro', serif;
+    font-size: 24px;
+    font-weight: 300;
+    color: var(--warm-gray);
+    margin-top: 14px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-style: italic;
+  }
+
+  .comparison {
+    display: grid;
+    grid-template-columns: 1fr 60px 1fr;
+    gap: 0;
+    align-items: start;
+  }
+
+  .column {
+    padding: 0 40px;
+  }
+
+  .column-header {
+    font-family: 'Crimson Pro', 'Noto Serif SC', serif;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 44px;
+    padding-bottom: 18px;
+    border-bottom: 1.5px solid var(--light-gray);
+  }
+
+  .column.left .column-header {
+    color: var(--warm-gray);
+    text-align: right;
+  }
+
+  .column.right .column-header {
+    color: var(--ink);
+    text-align: left;
+  }
+
+  .divider {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding-top: 48px;
+  }
+
+  .divider-line {
+    width: 1px;
+    height: 380px;
+    background: linear-gradient(180deg, var(--light-gray), var(--terracotta-light), var(--light-gray));
+  }
+
+  .row {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 48px;
+  }
+
+  .column.left .row {
+    flex-direction: row-reverse;
+    text-align: right;
+  }
+
+  .row-icon {
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 24px;
+  }
+
+  .row-icon svg {
+    width: 40px;
+    height: 40px;
+  }
+
+  .column.left .row-icon svg {
+    stroke: var(--warm-gray);
+    opacity: 0.5;
+  }
+
+  .column.right .row-icon svg {
+    stroke: var(--terracotta);
+  }
+
+  .row-content h3 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+
+  .column.left .row-content h3 {
+    color: var(--warm-gray);
+  }
+
+  .column.right .row-content h3 {
+    color: var(--ink);
+  }
+
+  .row-content p {
+    font-family: 'Crimson Pro', 'Noto Serif SC', serif;
+    font-size: 22px;
+    font-weight: 300;
+    line-height: 1.6;
+    color: var(--warm-gray);
+  }
+
+  .column.right .row-content p .accent {
+    color: var(--terracotta);
+    font-weight: 600;
+  }
+
+  .tagline {
+    text-align: center;
+    margin-top: 56px;
+    position: relative;
+  }
+
+  .tagline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 200px;
+    right: 200px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--light-gray), transparent);
+  }
+
+  .tagline p {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 30px;
+    font-weight: 600;
+    color: var(--terracotta);
+    padding-top: 36px;
+    letter-spacing: 0.02em;
+  }
+
+  .tagline p span {
+    color: var(--warm-gray);
+    font-weight: 400;
+  }
+
+  /* Decorative corner marks */
+  .corner {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border-color: var(--light-gray);
+    border-style: solid;
+  }
+  .corner.tl { top: 40px; left: 60px; border-width: 1px 0 0 1px; }
+  .corner.tr { top: 40px; right: 60px; border-width: 1px 1px 0 0; }
+  .corner.bl { bottom: 40px; left: 60px; border-width: 0 0 1px 1px; }
+  .corner.br { bottom: 40px; right: 60px; border-width: 0 1px 1px 0; }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="corner tl"></div>
+  <div class="corner tr"></div>
+  <div class="corner bl"></div>
+  <div class="corner br"></div>
+
+  <div class="header">
+    <h1>为什么用 <em>Claude Code</em>？</h1>
+    <div class="subtitle">Talking vs Doing</div>
+  </div>
+
+  <div class="comparison">
+    <div class="column left">
+      <div class="column-header">网页版 Claude</div>
+
+      <div class="row">
+        <div class="row-content">
+          <h3>失忆</h3>
+          <p>每次新对话重来<br>上下文随关闭消失</p>
+        </div>
+        <div class="row-icon">
+          <svg viewBox="0 0 32 32" fill="none" stroke-width="1.5" stroke-linecap="round">
+            <circle cx="16" cy="16" r="12"/>
+            <path d="M12 12l8 8M20 12l-8 8"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="row-content">
+          <h3>动嘴</h3>
+          <p>只能建议你手动操作<br>"请打开终端输入…"</p>
+        </div>
+        <div class="row-icon">
+          <svg viewBox="0 0 32 32" fill="none" stroke-width="1.5" stroke-linecap="round">
+            <path d="M8 22c0-2 3-3 8-3s8 1 8 3"/>
+            <circle cx="16" cy="12" r="5"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="row-content">
+          <h3>单次对话</h3>
+          <p>无法扩展能力<br>只有基础功能</p>
+        </div>
+        <div class="row-icon">
+          <svg viewBox="0 0 32 32" fill="none" stroke-width="1.5" stroke-linecap="round">
+            <rect x="8" y="8" width="16" height="16" rx="2"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider">
+      <div class="divider-line"></div>
+    </div>
+
+    <div class="column right">
+      <div class="column-header">Claude Code</div>
+
+      <div class="row">
+        <div class="row-icon">
+          <svg viewBox="0 0 32 32" fill="none" stroke-width="1.5" stroke-linecap="round">
+            <circle cx="16" cy="16" r="12"/>
+            <path d="M12 16l3 3 5-6"/>
+          </svg>
+        </div>
+        <div class="row-content">
+          <h3>记忆</h3>
+          <p>文件即上下文<br>项目全局 <span class="accent">持久记忆</span></p>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="row-icon">
+          <svg viewBox="0 0 32 32" fill="none" stroke-width="1.5" stroke-linecap="round">
+            <path d="M6 16h20M16 6v20"/>
+            <path d="M10 10l12 12M22 10l-12 12" stroke-width="1"/>
+          </svg>
+        </div>
+        <div class="row-content">
+          <h3>动手</h3>
+          <p>直接执行操作<br>一句话 <span class="accent">释放 106G</span></p>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="row-icon">
+          <svg viewBox="0 0 32 32" fill="none" stroke-width="1.5" stroke-linecap="round">
+            <rect x="6" y="6" width="20" height="20" rx="2"/>
+            <path d="M6 14h20M14 6v20"/>
+          </svg>
+        </div>
+        <div class="row-content">
+          <h3>AI 操作系统</h3>
+          <p>Skills = 升级补丁<br><span class="accent">无限扩展</span>能力边界</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tagline">
+    <p><span>Claude 是用来讨论的，</span>Claude Code 是用来行动的</p>
+  </div>
+</div>
+</body>
+</html>

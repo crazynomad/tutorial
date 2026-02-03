@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>文件重命名 — Before / After</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #131314;
+    --cream: #faf9f0;
+    --terracotta: #d97757;
+    --terracotta-light: #e8a08a;
+    --warm-gray: #9c958b;
+    --light-gray: #e8e4db;
+    --subtle-gray: #f3f0e8;
+    --green: #6b9e78;
+    --red-muted: #c4665a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Crimson Pro', 'Noto Serif SC', serif;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem;
+  }
+
+  .canvas {
+    width: 1920px;
+    height: 1080px;
+    background: var(--cream);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 48px 72px 40px;
+  }
+
+  .canvas::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 25%, rgba(217, 119, 87, 0.03) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 75%, rgba(107, 158, 120, 0.025) 0%, transparent 45%);
+    pointer-events: none;
+  }
+
+  .canvas::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 72px; right: 72px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--light-gray), transparent);
+  }
+
+  .corner { position: absolute; width: 18px; height: 18px; border-color: var(--light-gray); border-style: solid; }
+  .corner.tl { top: 28px; left: 44px; border-width: 1px 0 0 1px; }
+  .corner.tr { top: 28px; right: 44px; border-width: 1px 1px 0 0; }
+  .corner.bl { bottom: 28px; left: 44px; border-width: 0 0 1px 1px; }
+  .corner.br { bottom: 28px; right: 44px; border-width: 0 1px 1px 0; }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 28px;
+    flex-shrink: 0;
+  }
+
+  .header h1 {
+    font-family: 'Playfair Display', 'Noto Serif SC', serif;
+    font-size: 48px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+
+  .header h1 em {
+    font-style: italic;
+    color: var(--terracotta);
+    font-family: 'Playfair Display', serif;
+  }
+
+  .header .subtitle {
+    font-family: 'Crimson Pro', serif;
+    font-size: 18px;
+    font-weight: 300;
+    color: var(--warm-gray);
+    margin-top: 6px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-style: italic;
+  }
+
+  /* Column headers */
+  .col-headers {
+    display: grid;
+    grid-template-columns: 36px 1fr 32px 1fr;
+    gap: 0;
+    padding: 0 4px 10px;
+    border-bottom: 1.5px solid var(--light-gray);
+    margin-bottom: 6px;
+    flex-shrink: 0;
+  }
+
+  .col-label {
+    font-family: 'Crimson Pro', serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .col-label.before { color: var(--warm-gray); }
+  .col-label.after { color: var(--ink); }
+
+  /* Rows */
+  .rows {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow: hidden;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 36px 1fr 32px 1fr;
+    gap: 0;
+    align-items: center;
+    padding: 4.5px 4px;
+    border-radius: 6px;
+  }
+
+  .row:nth-child(odd) {
+    background: rgba(19, 19, 20, 0.018);
+  }
+
+  .row-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--light-gray);
+    text-align: center;
+  }
+
+  .row-before {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--warm-gray);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 12px;
+    opacity: 0.75;
+  }
+
+  .row-arrow {
+    text-align: center;
+    color: var(--terracotta);
+    font-size: 15px;
+    opacity: 0.6;
+  }
+
+  .row-after {
+    font-family: 'JetBrains Mono', 'Noto Serif SC', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-left: 12px;
+  }
+
+  /* Highlight rows where the rename is dramatic */
+  .row.dramatic .row-before {
+    color: var(--red-muted);
+    opacity: 0.65;
+    text-decoration: line-through;
+    text-decoration-color: rgba(196, 102, 90, 0.3);
+  }
+
+  .row.dramatic .row-after {
+    color: var(--terracotta);
+    font-weight: 600;
+  }
+
+  .row.dramatic .row-arrow {
+    opacity: 1;
+  }
+
+  /* Minimal rename */
+  .row.minimal .row-before { opacity: 0.5; }
+  .row.minimal .row-after { color: var(--warm-gray); }
+
+  /* Bottom stats */
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 80px;
+    margin-top: 14px;
+    padding-top: 14px;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .stats-bar::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 150px; right: 150px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--light-gray), transparent);
+  }
+
+  .stat { text-align: center; }
+
+  .stat-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .stat-number.accent { color: var(--terracotta); }
+  .stat-number.green { color: var(--green); }
+  .stat-number.gray { color: var(--warm-gray); }
+
+  .stat-label {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--warm-gray);
+    margin-top: 3px;
+  }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="corner tl"></div>
+  <div class="corner tr"></div>
+  <div class="corner bl"></div>
+  <div class="corner br"></div>
+
+  <div class="header">
+    <h1>AI 重命名：<em>一眼看懂每份文件</em></h1>
+    <div class="subtitle">28 PPTs &mdash; Original Filename vs AI-Generated Name</div>
+  </div>
+
+  <div class="col-headers">
+    <div></div>
+    <div class="col-label before">原始文件名</div>
+    <div></div>
+    <div class="col-label after">AI 生成文件名</div>
+  </div>
+
+  <div class="rows">
+    <div class="row dramatic">
+      <div class="row-num">01</div>
+      <div class="row-before">ct2ifrqzccgh1zk (1).pptx</div>
+      <div class="row-arrow">&rarr;</div>
+      <div class="row-after">彩虹独角兽六大工程化能力体系.pptx</div>
+    </div>
+    <div class="row dramatic">
+      <div class="row-num">02</div>
+      <div class="row-before">tmpbusc_qc9.pptx</div>
+      <div class="row-arrow">&rarr;</div>
+      <div class="row-after">tmpbusc_qc9幻灯片展示.pptx</div>
+    </div>
+    <div class="row dramatic">
+      <div class="row-num">03</div>
+      <div class="row-before">mck_restructured_v1.pptx</div>
+      <div class="row-arrow">&rarr;</div>
+      <div class="row-after">C端触点整合用户数据管理策略.pptx</div>
+    </div>
+    <div class="row dramatic">
+      <div class="row-num">04</div>
+      <div class="row-before">AI (1).pptx</div>
+      <div class="row-arrow">&rarr;</div>
+      <div class="row-after">AI驱动产品管理实战指南.pptx</div>
+    </div>
+    <div class="row dramatic">
+      <div class="row-num">05</div>
+      <div class="row-before">AI (2).pptx</div>
+      <div class="row-arrow">&rarr;</div>
+      <div class="row-after">产品经理AI工具使用指南.pptx</div>
+    </div>
+    <div class="row dramatic">
+      <div class="row-num">06</div>
+      <div class="row-before">DMS.pptx</div>
+      <div class="row-arrow">&rarr;</div>
+      <div class="row-after">北极熊DMS三年优化运维方案.pptx</div>
+    </div>
+    <div class="row dramatic">
+      <div class="row-num">07</div>
+      <div class="row-before">章鱼云.pptx</div>
+      <div class="row-arrow">&rarr;</div>
+      <div class="row-after">章鱼云×彩虹独角兽联合项目报告.pptx</div>
+    </div>
+    <div class="row dramatic">
+      <div class="row-num">08</div>
+      <div class="row-before">1、招标答疑文件-DPAD.pptx</div>
+      <div class="row-arrow">&rarr;</div>
+      <div class="row-after">闪电3000特别版车型提升方案.pptx</div>
+    </div>
+    <div class="row dramatic">
+      <div class="row-num">09</div>
+      <div class="row-before">1、小狮子招标答疑文件-DPAD.pptx</div>
+      <div class="row-arrow">&rarr;</div>
+      <div class="row-after">小狮子品牌营销策略.pptx</div>
+    </div>
+    <div class="row dramatic">
+      <div class="row-num">10</div>
+      <div class="row-before">1  OneID方案最终_V6展开版.pptx</div>
+      <div class="row-arrow">&rarr;</div>
+      <div class="row-after">业务数据统一匹配方案.pptx</div>
+    </div>
+    <div class="row">
+      <div class="row-num">11</div>
+      <div class="row-before">1.7&3.2 产品资料更新(1).pptx</div>
+      <div class="row-arrow">&rarr;</div>
+      <div class="row-after">产品数字化营销策略.pptx</div>
+    </div>
+    <div class="row">
+      <div class="row-num">12</div>
+      <div class="row-before">1.7在开发研发项目清单 (1).pptx</div>
+      <div class="row-arrow">&rarr;</div>
+      <div class="row-after">数智化客户全生命周期管理.pptx</div>
+    </div>
+    <div class="row">
+      <div class="row-num">13</div>
+      <div class="row-before">GenAI-Training-PO.pptx</div>
+      <div class="row-arrow">&rarr;</div>
+      <div class="row-after">AI驱动产品管理培训指南.pptx</div>
+    </div>
+    <div class="row">
+      <div class="row-num">14</div>
+      <div class="row-before">PolarBear-BI-2026-2028.pptx</div>
+      <div class="row-arrow">&rarr;</div>
+      <div class="row-after">北极熊BI三年规划方案.pptx</div>
+    </div>
+    <div class="row">
+      <div class="row-num">15</div>
+      <div class="row-before">【0507】飞天8号专区-.pptx</div>
+      <div class="row-arrow">&rarr;</div>
+      <div class="row-after">飞天8号专区营销方案.pptx</div>
+    </div>
+    <div class="row">
+      <div class="row-num">16</div>
+      <div class="row-before">【课程3】智慧网销0818 (1).pptx</div>
+      <div class="row-arrow">&rarr;</div>
+      <div class="row-after">智慧网销人机协作提升.pptx</div>
+    </div>
+    <div class="row">
+      <div class="row-num">17</div>
+      <div class="row-before">【汽车行业】案例集.pptx</div>
+      <div class="row-arrow">&rarr;</div>
+      <div class="row-after">汽车企业客服系统优化策略.pptx</div>
+    </div>
+    <div class="row">
+      <div class="row-num">18</div>
+      <div class="row-before">【四轮百科】全链路数字化解决方案V3.0_0920.pptx</div>
+      <div class="row-arrow">&rarr;</div>
+      <div class="row-after">四轮百科全链路AI数字化方案.pptx</div>
+    </div>
+    <div class="row">
+      <div class="row-num">19</div>
+      <div class="row-before">【数说金丝雀-监测&预警】企业品牌危机监测解决方案(1).pptx</div>
+      <div class="row-arrow">&rarr;</div>
+      <div class="row-after">金丝雀企业品牌危机监测解决方案.pptx</div>
+    </div>
+    <div class="row">
+      <div class="row-num">20</div>
+      <div class="row-before">智能新媒体产品介绍1229.pptx</div>
+      <div class="row-arrow">&rarr;</div>
+      <div class="row-after">银河汽车智能新媒体运营方案.pptx</div>
+    </div>
+    <div class="row">
+      <div class="row-num">21</div>
+      <div class="row-before">01 Essential SAFe Overview and Diagnostic…(6.0).pptx</div>
+      <div class="row-arrow">&rarr;</div>
+      <div class="row-after">SAFe基础配置诊断指南.pptx</div>
+    </div>
+    <div class="row">
+      <div class="row-num">22</div>
+      <div class="row-before">01 Introduction to LPM for Executives (V5.1).pptx</div>
+      <div class="row-arrow">&rarr;</div>
+      <div class="row-after">LPM在SAFe中的应用与实践.pptx</div>
+    </div>
+    <div class="row">
+      <div class="row-num">23</div>
+      <div class="row-before">KPI改进思路和团队配置.pptx</div>
+      <div class="row-arrow">&rarr;</div>
+      <div class="row-after">KPI提升与团队配置策略.pptx</div>
+    </div>
+    <div class="row">
+      <div class="row-num">24</div>
+      <div class="row-before">彩虹独角兽-汽车事业部介绍-20251111.pptx</div>
+      <div class="row-arrow">&rarr;</div>
+      <div class="row-after">彩虹独角兽汽车事业部智能化运维方案.pptx</div>
+    </div>
+    <div class="row">
+      <div class="row-num">25</div>
+      <div class="row-before">彩虹独角兽公司介绍及汽车行业能力简介2025-通用版.pptx</div>
+      <div class="row-arrow">&rarr;</div>
+      <div class="row-after">彩虹独角兽2025汽车行业AI能力.pptx</div>
+    </div>
+    <div class="row minimal">
+      <div class="row-num">26</div>
+      <div class="row-before">彩虹独角兽智能化体系建设与合作建议.pptx</div>
+      <div class="row-arrow">&rarr;</div>
+      <div class="row-after">彩虹独角兽智能化体系建设与合作.pptx</div>
+    </div>
+    <div class="row minimal">
+      <div class="row-num">27</div>
+      <div class="row-before">C端数字化能力规划.pptx</div>
+      <div class="row-arrow">&rarr;</div>
+      <div class="row-after">C端数字化能力规划.pptx</div>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-number accent">10</div>
+      <div class="stat-label">完全不可读 &rarr; 可读</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number accent">12</div>
+      <div class="stat-label">含噪音 &rarr; 精炼</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number green">3</div>
+      <div class="stat-label">微调 / 保留原名</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number gray">2</div>
+      <div class="stat-label">英文 &rarr; 中文</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

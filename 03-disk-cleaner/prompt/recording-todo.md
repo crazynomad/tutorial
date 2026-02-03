@@ -33,28 +33,22 @@
 
 ## 待录屏
 
-### Scene 02B: 文档智能 + 文件管家演示 🔴
+### Scene 02B: 文档智能演示 🔴
 
-- **内容**：演示 doc-mindmap（文档智能）和 file-master（文件管家）两个 Skill
-- **时长**：约 60-90 秒录屏素材
+- **内容**：演示 doc-mindmap（文档智能）Skill
+- **时长**：约 40-60 秒录屏素材
 - **过渡语境**：前面清理和整理"自己也能干"，但电脑上 4000+ PPT、14000+ PDF 的内容解读分类"困扰好多年，一直不敢面对"——引出文档智能 Skill
 - **口播对应**：
   > "这件事困扰我好多年了，一直不敢面对"
   > "文档智能整理助手，就是来解决这个大难题的"
-  > "file-master 一句话启动，三步自动完成"
 - **操作**：
-  1. **doc-mindmap 部分**：
-     - 跟 Claude 说"帮我把下载文件夹里的 PDF 做个整理分析"
-     - 展示 PDF → Markdown 批量转换过程
-     - 展示 Ollama 本地摘要生成（强调"完全在本地运行"）
-     - 展示三维度分类结果 + 智能重命名前后对比
-     - 展示生成的思维导图
-  2. **file-master 部分**：
-     - 跟 Claude 说"帮我把文件从清理到分析全部搞定"
-     - 展示三阶段自动串联执行（瘦身 → 收纳 → 提炼）
-     - 重点展示它自动衔接三个步骤的过程
+  - 跟 Claude 说"帮我把下载文件夹里的 PDF 做个整理分析"
+  - 展示 PDF → Markdown 批量转换过程
+  - 展示 Ollama 本地摘要生成（强调"完全在本地运行"）
+  - 展示三维度分类结果 + 智能重命名前后对比
+  - 展示生成的思维导图
 - **关键帧截图建议**：保存到 `recording/scene02b/`，编号命名
-- **备注**：两个 Skill 放在同一个录屏里即可，中间自然过渡。过渡段口播不需要录屏画面，可以用 Finder 里密密麻麻的 PDF 列表作为画面背景
+- **备注**：过渡段口播不需要录屏画面，可以用 Finder 里密密麻麻的 PDF 列表作为画面背景
 
 ### Scene 03: 原理讲解 — Mole GitHub 主页 🔴
 
@@ -66,7 +60,7 @@
   1. 浏览器打开 https://github.com/tw93/Mole
   2. 缓慢滚动展示 Star 数和功能列表
   3. 停留在 README 的命令示例部分
-- **备注**：其余部分（MoleFeatures / DocMindmapFeatures / SkillArchitecture / FileMasterPipeline / OpenSourceEco）均为 Remotion 动画，无需录屏
+- **备注**：其余部分（MoleFeatures / DocMindmapFeatures / SkillArchitecture / OpenSourceEco）均为 Remotion 动画，无需录屏
 
 ### Scene 04: Claude.ai vs Claude Code — 网页版对比 🔴
 
@@ -114,7 +108,6 @@
 | Scene 03 Mole 功能图 | `MoleFeatures` | ✅ |
 | Scene 03 文档智能图 | `DocMindmapFeatures` | ✅ 新增 |
 | Scene 03 三层架构 | `SkillArchitecture` | ✅ 已更新 |
-| Scene 03 三阶段流水线 | `FileMasterPipeline` | ✅ 新增 |
 | Scene 03 开源生态 | `OpenSourceEco` | ✅ |
 | Scene 04 云端 vs 本地对比 | `CloudVsLocal` | ✅ |
 | Scene 04 金句落版 | `TextEmphasis` | ✅ |
