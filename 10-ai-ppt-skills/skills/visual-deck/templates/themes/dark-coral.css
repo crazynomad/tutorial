@@ -1,0 +1,70 @@
+/*
+ * theme.css — 视觉版 deck 的主题 token
+ *
+ * 所有 slide HTML 通过 <link rel="stylesheet" href="../theme.css"> 引用此文件。
+ * 换主题只改这一个文件。每个 slide 的内部 <style> 只用 var(--xxx)，不硬编码 hex / 字号 / 字体。
+ *
+ * 默认：暗色 CORAL 系。切主题示例见本文件末尾的注释。
+ */
+
+:root {
+  /* ---- 色彩 ---- */
+  --bg:        #0A0A0A;  /* 底色 void black */
+  --fg:        #F5F2EB;  /* 正文 warm off-white */
+  --muted:    #8A8A8A;   /* 次要文字 */
+  --dim:      #6B6B6B;   /* 最弱文字（label/source）*/
+  --faint:    #5A5A5A;   /* 更弱（footer）*/
+  --accent:   #FF6B47;   /* 主点缀 warm coral */
+  --accent-2: #D4A574;   /* 副点缀 warm gold */
+  --panel:    #2a1a15;   /* 图位占位色（没图时的 fallback）*/
+
+  /* ---- 暗罩 ---- */
+  --scrim-base: rgba(10, 10, 10, 0.55);
+  --scrim-left: rgba(10, 10, 10, 0.35);
+  --scrim-heavy: rgba(10, 10, 10, 0.62);
+
+  /* ---- 字体 ---- */
+  --font-sans: "Microsoft YaHei", "微软雅黑", Helvetica, Arial, sans-serif;
+
+  /* ---- 字号 ---- */
+  --fs-hero:      60pt;
+  --fs-title:     32pt;
+  --fs-subtitle:  16pt;
+  --fs-lede:      14pt;
+  --fs-body:      12pt;
+  --fs-label:     9pt;
+  --fs-source:    8pt;
+
+  /* ---- 字重 ---- */
+  --fw-bold:   700;
+  --fw-normal: 400;
+  --fw-light:  300;
+
+  /* ---- 间距 ---- */
+  --pad-slide: 42pt 48pt 36pt 48pt;   /* HF/封面 padding */
+  --pad-r34:   42pt 320pt 36pt 48pt;  /* R34 右留图位 */
+  --pad-l34:   42pt 48pt 36pt 320pt;  /* L34 左留图位 */
+
+  /* ---- 图像位宽度（3:4 竖图） ---- */
+  --imgpane-w: 304pt;
+
+  /* ---- slide 尺寸（LAYOUT_16x9，勿改） ---- */
+  --slide-w: 720pt;
+  --slide-h: 405pt;
+}
+
+/*
+ * ---- 切主题示例 ----
+ *
+ * 暗色 TEAL 系（技术章节）：
+ *   --accent:   #76C7C0;
+ *   --accent-2: #D4A574;
+ *
+ * 浅色 NAVY 系（对外客户版）：
+ *   --bg: #F7F5F0; --fg: #1a1a1a; --muted: #4a4a4a;
+ *   --accent: #1E3A8A; --accent-2: #B08D57;
+ *   --scrim-base: rgba(255,255,255,0.6);
+ *
+ * 注意：html2pptx.js 不支持 div 的 linear-gradient 背景，
+ * 渐变效果请做进背景图本身或改用 solid color。
+ */

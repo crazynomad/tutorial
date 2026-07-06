@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<!--
+  slide-stats.html · 数字摘要 · 2×2 大数字格子
+
+  USE WHEN:
+    - 用数字说话的页：KPI 摘要、成绩单、市场数据、现状诊断
+    - 3~4 个并列数字，每个需要一句上下文（占比变化、绝对值、同比等）
+    - 数字是论点本身（不是佐证）
+
+  DO NOT USE WHEN:
+    - 只有一个核心数字 → 用 quote 放大它
+    - 数据需要对比（A vs B） → 用 2col
+    - 数据有时间序列 → 用 timeline
+    - 超过 6 个数字 → 拆两页或用数据图表（需外部生成）
+
+  当前模板是 2×2，若 3 个数字可改 grid-template-columns: repeat(3, 1fr)。
+  主题变量取自 ../themes/*.css。
+-->
+<html lang="zh">
+<head><meta charset="UTF-8">
+<link rel="stylesheet" href="../themes/dark-coral.css">
+<style>
+html { background: var(--bg); }
+body {
+  width: var(--slide-w); height: var(--slide-h); margin: 0; padding: 0;
+  font-family: var(--font-sans); color: var(--fg); background: var(--bg);
+}
+.slide {
+  width: var(--slide-w); height: var(--slide-h);
+  padding: var(--pad-slide); box-sizing: border-box;
+  display: flex; flex-direction: column;
+}
+.eyebrow { font-weight: var(--fw-light); font-size: var(--fs-label); letter-spacing: 3pt; color: var(--accent); margin: 0 0 6pt 0; }
+.title { font-size: var(--fs-title); font-weight: var(--fw-bold); color: #FFFFFF; margin: 0 0 14pt 0; line-height: 1.2; }
+.title .accent { color: var(--accent); }
+
+.grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14pt; flex: 1; }
+.stat { padding: 12pt; box-sizing: border-box; background: var(--panel); display: flex; flex-direction: column; justify-content: center; }
+.stat-label { font-size: var(--fs-label); letter-spacing: 2pt; color: var(--dim); margin: 0 0 4pt 0; }
+.stat-num { font-size: 52pt; font-weight: var(--fw-bold); color: var(--accent); line-height: 1; margin: 0 0 4pt 0; letter-spacing: -1pt; }
+.stat-unit { font-size: 18pt; color: var(--accent-2); padding-left: 4pt; font-weight: var(--fw-normal); }
+.stat-note { font-size: 11pt; color: var(--fg); margin: 6pt 0 0 0; line-height: 1.4; }
+
+.source { font-size: var(--fs-source); color: var(--faint); letter-spacing: 1pt; margin: 12pt 0 0 0; }
+</style></head>
+<body>
+<div class="slide">
+  <p class="eyebrow">SECTION · SCORECARD</p>
+  <h1 class="title">2026 Q1 <span class="accent">成绩单</span></h1>
+
+  <div class="grid">
+    <div class="stat">
+      <p class="stat-label">自主品牌市占率</p>
+      <p class="stat-num">70<span class="stat-unit">%</span></p>
+      <p class="stat-note">单月历史新高，合资集体失速</p>
+    </div>
+    <div class="stat">
+      <p class="stat-label">新能源渗透率</p>
+      <p class="stat-num">52.9<span class="stat-unit">%</span></p>
+      <p class="stat-note">Q1 首次破 50%，过半了</p>
+    </div>
+    <div class="stat">
+      <p class="stat-label">前十车企单车毛利为负</p>
+      <p class="stat-num">6<span class="stat-unit">/10</span></p>
+      <p class="stat-note">净利率 4.3%，历史新低</p>
+    </div>
+    <div class="stat">
+      <p class="stat-label">德系份额</p>
+      <p class="stat-num">11.2<span class="stat-unit">%</span></p>
+      <p class="stat-note">从 13.2 跌至此，历史最低</p>
+    </div>
+  </div>
+
+  <p class="source">Source · 中汽协 / 腾讯汽车 · 2026 Q1</p>
+</div>
+</body>
+</html>

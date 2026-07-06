@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<!--
+  player.html — 无依赖 HTML deck 播放器
+
+  功能：
+    - 键盘翻页（← → / space / PgUp/Dn / Home/End）
+    - 全屏（F）
+    - 跳转（G + 数字 + 回车）
+    - 缩略图总览（O）
+    - URL hash 深链（#slide=5）
+    - 点击屏幕左/右 20% 区域翻页
+
+  用法：
+    1. 复制到 deck/ 根目录
+    2. 编辑下方 const TITLES（可选，留空则不显示缩略图标题）
+    3. 浏览器打开 player.html
+    4. 自动发现 slides/slideNN.html（按需调整 SLIDE_PATTERN）
+
+  自适应：
+    slide 原生 960×540px；播放器用 transform: scale() 缩放到视口，保持 16:9。
+-->
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>Deck Player</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; background: #000; font-family: "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif; color: #F5F2EB; overflow: hidden; }
+
+  #stage { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; }
+  #frame-wrap { width: 960px; height: 540px; position: relative; transform-origin: center center; }
+  iframe { width: 960px; height: 540px; border: 0; display: block; background: #0A0A0A; box-shadow: 0 0 60px rgba(118, 199, 192, 0.08); }
+
+  #progress { position: fixed; top: 0; left: 0; height: 2px; background: #76C7C0; z-index: 10; transition: width 180ms ease; }
+
+  #counter { position: fixed; bottom: 18px; right: 24px; font-size: 11px; letter-spacing: 2px; color: #6B6B6B; z-index: 10; user-select: none; }
+  #counter .current { color: #76C7C0; font-weight: 700; font-size: 13px; }
+
+  #nav-hint { position: fixed; bottom: 18px; left: 24px; font-size: 10px; letter-spacing: 1.5px; color: #555; z-index: 10; user-select: none; transition: opacity 500ms; }
+  #nav-hint kbd { background: #222; border: 1px solid #333; border-radius: 2px; padding: 1px 5px; margin: 0 2px; font-family: inherit; font-size: 10px; color: #888; }
+  #nav-hint.hidden { opacity: 0; }
+
+  #title-bar { position: fixed; top: 0; right: 0; padding: 10px 20px; font-size: 10px; letter-spacing: 2px; color: #444; z-index: 10; user-select: none; }
+
+  .click-zone { position: fixed; top: 0; bottom: 0; width: 20%; z-index: 5; cursor: pointer; opacity: 0; transition: opacity 200ms; }
+  .click-zone:hover { opacity: 1; }
+  #click-left { left: 0; background: linear-gradient(to right, rgba(118,199,192,0.1), transparent); }
+  #click-right { right: 0; background: linear-gradient(to left, rgba(118,199,192,0.1), transparent); }
+
+  #goto { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 20; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 18px; }
+  #goto.visible { display: flex; }
+  #goto input { background: transparent; border: none; border-bottom: 2px solid #76C7C0; color: #F5F2EB; font-size: 48px; font-family: inherit; width: 160px; text-align: center; outline: none; letter-spacing: 4px; }
+  #goto .label { font-size: 10px; letter-spacing: 3px; color: #76C7C0; }
+  #goto .hint { font-size: 10px; letter-spacing: 2px; color: #555; }
+
+  #overview { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 20; display: none; padding: 40px; overflow: auto; }
+  #overview.visible { display: block; }
+  #overview h2 { font-size: 12px; letter-spacing: 4px; color: #76C7C0; margin: 0 0 24px 0; font-weight: 700; text-align: center; }
+  #thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; max-width: 1400px; margin: 0 auto; }
+  .thumb { position: relative; background: #111; border: 1px solid #1c2c2c; border-radius: 3px; overflow: hidden; cursor: pointer; transition: border-color 150ms; }
+  .thumb:hover { border-color: #76C7C0; }
+  .thumb.active { border-color: #D4A574; box-shadow: 0 0 16px rgba(212,165,116,0.25); }
+  .thumb-head { padding: 6px 10px; background: #152525; border-bottom: 1px solid #1c2c2c; display: flex; justify-content: space-between; font-size: 9px; letter-spacing: 1.5px; }
+  .thumb-no { color: #76C7C0; font-weight: 700; }
+  .thumb-title { color: #F5F2EB; font-weight: 400; }
+  .thumb-frame { position: relative; width: 100%; padding-top: 56.25%; background: #000; pointer-events: none; }
+  .thumb-frame iframe { position: absolute; top: 0; left: 0; width: calc(100% / 0.29); height: calc(100% / 0.29); transform: scale(0.29); transform-origin: top left; border: 0; }
+</style>
+</head>
+<body>
+
+<div id="title-bar">DECK · PLAYER</div>
+<div id="progress"></div>
+
+<div id="stage">
+  <div id="frame-wrap">
+    <iframe id="slide-frame" src=""></iframe>
+  </div>
+</div>
+
+<div id="click-left" class="click-zone"></div>
+<div id="click-right" class="click-zone"></div>
+
+<div id="counter"><span class="current">01</span> / <span id="total">--</span></div>
+
+<div id="nav-hint">
+  <kbd>←</kbd><kbd>→</kbd> 翻页 · <kbd>F</kbd> 全屏 · <kbd>G</kbd> 跳转 · <kbd>O</kbd> 缩略图 · <kbd>Esc</kbd> 退出
+</div>
+
+<div id="goto">
+  <p class="label">GO TO SLIDE</p>
+  <input id="goto-input" type="text" inputmode="numeric" maxlength="3" placeholder="01">
+  <p class="hint">回车确认 · Esc 取消</p>
+</div>
+
+<div id="overview">
+  <h2>OVERVIEW · 点击跳转</h2>
+  <div id="thumbs"></div>
+</div>
+
+<script>
+  // ---- 按项目编辑（可选） ----
+  //   - 留空 `{}` 则缩略图不显示标题。
+  //   - 也可改成 { 1: '封面', 2: '第一章', ... }
+  const TITLES = {
+    // 1: '翻倍悖论', 2: '控方三枪', ...
+  };
+  // ---------------------------
+
+  const SLIDE_PATTERN = n => `slides/slide${String(n).padStart(2, '0')}.html`;
+  const SLIDE_W = 960;
+  const SLIDE_H = 540;
+
+  const frame = document.getElementById('slide-frame');
+  const wrap = document.getElementById('frame-wrap');
+  const progress = document.getElementById('progress');
+  const counter = document.querySelector('#counter .current');
+  const totalEl = document.getElementById('total');
+  const hint = document.getElementById('nav-hint');
+  const gotoEl = document.getElementById('goto');
+  const gotoInput = document.getElementById('goto-input');
+  const overview = document.getElementById('overview');
+  const thumbs = document.getElementById('thumbs');
+
+  let current = 1;
+  let TOTAL = 1;
+  let hintTimer;
+
+  const pad = n => String(n).padStart(2, '0');
+
+  async function discoverTotal() {
+    let n = 0;
+    while (n < 200) {
+      const next = n + 1;
+      try {
+        const r = await fetch(SLIDE_PATTERN(next), { method: 'HEAD' });
+        if (!r.ok) break;
+      } catch (_) { break; }
+      n = next;
+    }
+    return n || 1;
+  }
+
+  function goTo(n, push = true) {
+    n = Math.max(1, Math.min(TOTAL, n));
+    if (n === current && frame.src && frame.src.endsWith(SLIDE_PATTERN(n))) return;
+    current = n;
+    frame.src = SLIDE_PATTERN(n);
+    counter.textContent = pad(n);
+    progress.style.width = `${(n / TOTAL) * 100}%`;
+    if (push) history.replaceState(null, '', `#slide=${n}`);
+    highlightActiveThumb();
+  }
+
+  function fitStage() {
+    const scale = Math.min(window.innerWidth / SLIDE_W, window.innerHeight / SLIDE_H) * 0.94;
+    wrap.style.transform = `scale(${scale})`;
+  }
+
+  function showHint() {
+    hint.classList.remove('hidden');
+    clearTimeout(hintTimer);
+    hintTimer = setTimeout(() => hint.classList.add('hidden'), 3500);
+  }
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+    else document.exitFullscreen();
+  }
+
+  function openGoto() { gotoEl.classList.add('visible'); gotoInput.value = ''; gotoInput.focus(); }
+  function closeGoto() { gotoEl.classList.remove('visible'); gotoInput.blur(); }
+
+  function makeEl(tag, cls, text) {
+    const el = document.createElement(tag);
+    if (cls) el.className = cls;
+    if (text !== undefined) el.textContent = text;
+    return el;
+  }
+
+  function buildThumbs() {
+    for (let i = 1; i <= TOTAL; i++) {
+      const div = makeEl('div', 'thumb');
+      div.dataset.n = String(i);
+      const head = makeEl('div', 'thumb-head');
+      head.appendChild(makeEl('span', 'thumb-no', pad(i)));
+      head.appendChild(makeEl('span', 'thumb-title', TITLES[i] || ''));
+      const frameWrap = makeEl('div', 'thumb-frame');
+      const iframe = document.createElement('iframe');
+      iframe.src = SLIDE_PATTERN(i);
+      frameWrap.appendChild(iframe);
+      div.appendChild(head);
+      div.appendChild(frameWrap);
+      div.addEventListener('click', () => { closeOverview(); goTo(i); });
+      thumbs.appendChild(div);
+    }
+  }
+  function openOverview() { overview.classList.add('visible'); highlightActiveThumb(); }
+  function closeOverview() { overview.classList.remove('visible'); }
+  function highlightActiveThumb() {
+    document.querySelectorAll('.thumb').forEach(t => {
+      t.classList.toggle('active', Number(t.dataset.n) === current);
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (gotoEl.classList.contains('visible')) {
+      if (e.key === 'Enter') { const n = parseInt(gotoInput.value, 10); if (!isNaN(n)) goTo(n); closeGoto(); e.preventDefault(); }
+      else if (e.key === 'Escape') { closeGoto(); e.preventDefault(); }
+      return;
+    }
+    if (overview.classList.contains('visible')) {
+      if (e.key === 'Escape' || e.key.toLowerCase() === 'o') { closeOverview(); e.preventDefault(); }
+      return;
+    }
+    switch (e.key) {
+      case 'ArrowRight': case 'PageDown': case ' ': case 'Enter':
+        goTo(current + 1); showHint(); e.preventDefault(); break;
+      case 'ArrowLeft': case 'PageUp': case 'Backspace':
+        goTo(current - 1); showHint(); e.preventDefault(); break;
+      case 'Home': goTo(1); showHint(); e.preventDefault(); break;
+      case 'End': goTo(TOTAL); showHint(); e.preventDefault(); break;
+      case 'f': case 'F': toggleFullscreen(); e.preventDefault(); break;
+      case 'g': case 'G': openGoto(); e.preventDefault(); break;
+      case 'o': case 'O': openOverview(); e.preventDefault(); break;
+    }
+  });
+
+  document.getElementById('click-left').addEventListener('click', () => { goTo(current - 1); showHint(); });
+  document.getElementById('click-right').addEventListener('click', () => { goTo(current + 1); showHint(); });
+  gotoInput.addEventListener('input', () => { gotoInput.value = gotoInput.value.replace(/\D/g, ''); });
+
+  window.addEventListener('resize', fitStage);
+  window.addEventListener('hashchange', () => {
+    const m = location.hash.match(/slide=(\d+)/);
+    if (m) goTo(Number(m[1]), false);
+  });
+
+  (async () => {
+    TOTAL = await discoverTotal();
+    totalEl.textContent = pad(TOTAL);
+    buildThumbs();
+    fitStage();
+    const hashMatch = location.hash.match(/slide=(\d+)/);
+    goTo(hashMatch ? Number(hashMatch[1]) : 1, false);
+    showHint();
+  })();
+</script>
+</body>
+</html>

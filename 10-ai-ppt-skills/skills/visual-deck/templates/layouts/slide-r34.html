@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<!--
+  slide-r34.html · R34 layout · 右侧 3:4 竖图 + 左侧文字
+
+  USE WHEN:
+    - 一页讲一个论点，有明确的视觉隐喻（竖图）
+    - 左文: eyebrow + 标题 + 副标题 + 2~4 条 bullet
+    - deck 的主力版式（多数内容页都用 r34 或 l34）
+
+  DO NOT USE WHEN:
+    - 图像是横向构图（风景 / 宽场景）→ 用 slide-cover (HF)
+    - 只有一句金句 → 用 slide-quote
+    - 连续 3 页都用 r34 → 换一页 l34 打破节奏
+
+  镜像版：slide-l34.html（图在左，文字在右，适合打破节奏）。
+  主题变量取自 ../themes/*.css。
+-->
+<html lang="zh">
+<head><meta charset="UTF-8">
+<link rel="stylesheet" href="../themes/dark-coral.css">
+<style>
+html { background: var(--bg); }
+body {
+  width: var(--slide-w); height: var(--slide-h); margin: 0; padding: 0;
+  font-family: var(--font-sans); color: var(--fg);
+  position: relative; background: var(--bg);
+}
+.image-pane {
+  position: absolute; right: 0; top: 0;
+  width: var(--imgpane-w); height: var(--slide-h);
+  background: url('../images/slide02.png') center/cover no-repeat;
+}
+.slide {
+  position: relative; z-index: 1;
+  width: var(--slide-w); height: var(--slide-h);
+  padding: var(--pad-r34); box-sizing: border-box;
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.eyebrow { font-weight: var(--fw-light); font-size: var(--fs-label); letter-spacing: 3pt; color: var(--accent); margin: 0 0 8pt 0; }
+.title { font-size: var(--fs-title); font-weight: var(--fw-bold); color: #FFFFFF; margin: 0 0 12pt 0; line-height: 1.2; }
+.title .accent { color: var(--accent); }
+.lede { font-size: var(--fs-lede); color: var(--accent-2); margin: 0 0 18pt 0; line-height: 1.5; }
+.bullets { list-style: none; padding: 0; margin: 0; }
+.bullets li { font-size: var(--fs-body); color: var(--fg); margin: 0 0 8pt 0; padding-left: 16pt; position: relative; line-height: 1.5; }
+.bullets li::before { content: '—'; position: absolute; left: 0; color: var(--accent); }
+.source { font-size: var(--fs-source); color: var(--faint); letter-spacing: 1pt; margin: 0; }
+</style></head>
+<body>
+<div class="image-pane"></div>
+<div class="slide">
+  <div>
+    <p class="eyebrow">SECTION · SUBSECTION</p>
+    <h1 class="title">一句话 <span class="accent">标题</span></h1>
+    <p class="lede">副标题 — 把核心论点讲透一点</p>
+    <ul class="bullets">
+      <li>要点 1（尽量短，可量化）</li>
+      <li>要点 2</li>
+      <li>要点 3 — 装不下的放 notes-map.js，绝不缩字号</li>
+    </ul>
+  </div>
+  <p class="source">Source · 数据来源 · 年份</p>
+</div>
+</body>
+</html>

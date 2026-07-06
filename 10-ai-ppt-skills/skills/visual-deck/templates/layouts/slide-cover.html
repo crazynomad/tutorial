@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<!--
+  slide-cover.html · HF (Hero-Fill) layout · 16:9 背景图铺满 + 双层暗罩
+
+  USE WHEN:
+    - 封面 / 封底
+    - 章节边界（Part 1 / Part 2 分隔页）
+    - 一张图 + 一句话的视觉高潮页（可退化为不要金句，只有标题）
+
+  DO NOT USE WHEN:
+    - 需要展示 bullet 列表 → 用 slide-r34 / slide-l34
+    - 金句 + 少量 bullet → 用 slide-quote（保留金句的分量）
+    - 对比 / 数据 → 当前版式库不够，提需求
+
+  安全区：top/bottom 各 ~15% 依赖图片本身留白；--scrim-base 兜底对比度。
+  主题变量取自 ../themes/*.css，本文件不硬编码色值/字号。
+-->
+<html lang="zh">
+<head><meta charset="UTF-8">
+<link rel="stylesheet" href="../themes/dark-coral.css">
+<style>
+html { background: var(--bg); }
+body {
+  width: var(--slide-w); height: var(--slide-h); margin: 0; padding: 0;
+  font-family: var(--font-sans); color: var(--fg);
+  position: relative;
+  background: url('../images/slide01.png') center/cover no-repeat;
+}
+.scrim-base { position: absolute; inset: 0; background: var(--scrim-base); }
+.scrim-left { position: absolute; left: 0; top: 0; width: 400pt; height: 100%; background: var(--scrim-left); }
+
+.slide {
+  position: relative; z-index: 1;
+  width: var(--slide-w); height: var(--slide-h);
+  padding: var(--pad-slide); box-sizing: border-box;
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.top { display: flex; justify-content: space-between; align-items: center; }
+.label { font-weight: var(--fw-light); font-size: var(--fs-label); letter-spacing: 3pt; color: var(--dim); margin: 0; }
+.section-no { font-weight: var(--fw-light); font-size: var(--fs-label); color: var(--accent); letter-spacing: 2pt; margin: 0; }
+.prelude { font-size: var(--fs-lede); color: var(--muted); letter-spacing: 2pt; margin: 0 0 10pt 0; }
+.hero { font-size: var(--fs-hero); font-weight: var(--fw-bold); color: #FFFFFF; margin: 0; line-height: 1.15; }
+.hero .accent { color: var(--accent); }
+.subtitle { font-size: var(--fs-subtitle); color: var(--accent-2); margin: 10pt 0 0 0; line-height: 1.4; }
+.bottom { display: flex; justify-content: space-between; align-items: flex-end; }
+.bottom-label { font-size: var(--fs-source); color: var(--dim); letter-spacing: 1pt; margin: 0; }
+</style></head>
+<body>
+<div class="scrim-base"></div>
+<div class="scrim-left"></div>
+<div class="slide">
+  <div class="top">
+    <p class="label">BRAND · DIVISION</p>
+    <p class="section-no">YEAR · MONTH</p>
+  </div>
+  <div>
+    <p class="prelude">SECTION LABEL · CONTEXT</p>
+    <p class="hero">标题主张 <span class="accent">关键词</span>？</p>
+    <p class="subtitle">副标题 — 一句话讲清 deck 的核心立意</p>
+  </div>
+  <div class="bottom">
+    <p class="bottom-label">FOOTER LEFT</p>
+    <p class="bottom-label">FOOTER RIGHT</p>
+  </div>
+</div>
+</body>
+</html>

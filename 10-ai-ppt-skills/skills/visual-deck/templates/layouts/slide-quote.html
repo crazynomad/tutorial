@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<!--
+  slide-quote.html · Quote / 金句页 · 居中大字，无图或淡背景
+
+  USE WHEN:
+    - 全 deck 的"钉子"：观众记住一句话就算成功
+    - 内容只有一句 ≤ 40 字的核心论断 + 出处
+    - 通常出现 1~3 页 per deck，多了就稀释分量
+
+  DO NOT USE WHEN:
+    - 还有要点要展开 → 用 slide-r34 或 slide-cover
+    - 就是章节分隔，不是金句 → 用 slide-cover
+    - 需要数据/对比 → 当前版式库不够
+
+  与 slide-cover 的区别：
+    - cover 有背景图，金句小；quote 可无图，金句是主角
+    - cover 用在章节边界，quote 用在论证高潮点
+    - 字号不同：cover hero 60pt，quote quote-text 可达 40~48pt（对中文更合适）
+
+  主题变量取自 ../themes/*.css。
+-->
+<html lang="zh">
+<head><meta charset="UTF-8">
+<link rel="stylesheet" href="../themes/dark-coral.css">
+<style>
+html { background: var(--bg); }
+body {
+  width: var(--slide-w); height: var(--slide-h); margin: 0; padding: 0;
+  font-family: var(--font-sans); color: var(--fg);
+  position: relative; background: var(--bg);
+}
+.slide {
+  position: relative; z-index: 1;
+  width: var(--slide-w); height: var(--slide-h);
+  padding: 60pt 80pt; box-sizing: border-box;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  text-align: center;
+}
+.mark { font-size: 72pt; font-weight: var(--fw-bold); color: var(--accent); line-height: 1; margin: 0 0 4pt 0; }
+.quote-text {
+  font-size: 44pt; font-weight: var(--fw-bold); color: #FFFFFF;
+  line-height: 1.3; margin: 0; max-width: 560pt;
+}
+.quote-text .accent { color: var(--accent); }
+.attribution {
+  margin-top: 28pt;
+  font-size: var(--fs-lede); color: var(--accent-2);
+  letter-spacing: 1pt;
+}
+.source { position: absolute; bottom: 24pt; left: 48pt; font-size: var(--fs-source); color: var(--faint); letter-spacing: 1pt; margin: 0; }
+</style></head>
+<body>
+<div class="slide">
+  <p class="mark">"</p>
+  <p class="quote-text">客户名单不变，<span class="accent">打法必须变</span>。</p>
+  <p class="attribution">— 一句话讲清 deck 的核心主张</p>
+</div>
+<p class="source">Optional · 出处 / 引文来源</p>
+</body>
+</html>

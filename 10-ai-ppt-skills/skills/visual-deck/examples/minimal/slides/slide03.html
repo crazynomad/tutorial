@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<!-- Minimal example · slide 03 · Quote layout · 故意用 dark-teal 主题展示同 deck 混搭 -->
+<html lang="zh">
+<head><meta charset="UTF-8">
+<link rel="stylesheet" href="../themes/dark-teal.css">
+<style>
+html { background: var(--bg); }
+body {
+  width: var(--slide-w); height: var(--slide-h); margin: 0; padding: 0;
+  font-family: var(--font-sans); color: var(--fg); background: var(--bg);
+}
+.slide {
+  position: relative; z-index: 1;
+  width: var(--slide-w); height: var(--slide-h);
+  padding: 60pt 80pt; box-sizing: border-box;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  text-align: center;
+}
+.mark { font-size: 72pt; font-weight: var(--fw-bold); color: var(--accent); line-height: 1; margin: 0 0 4pt 0; }
+.quote-text {
+  font-size: 44pt; font-weight: var(--fw-bold); color: #FFFFFF;
+  line-height: 1.3; margin: 0; max-width: 560pt;
+}
+.quote-text .accent { color: var(--accent); }
+.attribution { margin-top: 28pt; font-size: var(--fs-lede); color: var(--accent-2); letter-spacing: 1pt; }
+.source { position: absolute; bottom: 24pt; left: 48pt; font-size: var(--fs-source); color: var(--faint); letter-spacing: 1pt; margin: 0; }
+</style></head>
+<body>
+<div class="slide">
+  <p class="mark">"</p>
+  <p class="quote-text">信息结构 <span class="accent">≫</span> 选项数量。</p>
+  <p class="attribution">— 本页用 dark-teal，前两页是 dark-coral</p>
+</div>
+<p class="source">同 deck 可混用多主题 · 靠 link 标签切换</p>
+</body>
+</html>

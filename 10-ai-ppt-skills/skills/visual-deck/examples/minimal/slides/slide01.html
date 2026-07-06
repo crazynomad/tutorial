@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<!-- Minimal example · slide 01 · HF cover layout, no background image (falls back to bg token). -->
+<html lang="zh">
+<head><meta charset="UTF-8">
+<link rel="stylesheet" href="../themes/dark-coral.css">
+<style>
+html { background: var(--bg); }
+body {
+  width: var(--slide-w); height: var(--slide-h); margin: 0; padding: 0;
+  font-family: var(--font-sans); color: var(--fg);
+  position: relative; background: var(--bg);
+}
+.slide {
+  position: relative; z-index: 1;
+  width: var(--slide-w); height: var(--slide-h);
+  padding: var(--pad-slide); box-sizing: border-box;
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.top { display: flex; justify-content: space-between; align-items: center; }
+.label { font-weight: var(--fw-light); font-size: var(--fs-label); letter-spacing: 3pt; color: var(--dim); margin: 0; }
+.section-no { font-weight: var(--fw-light); font-size: var(--fs-label); color: var(--accent); letter-spacing: 2pt; margin: 0; }
+.prelude { font-size: var(--fs-lede); color: var(--muted); letter-spacing: 2pt; margin: 0 0 10pt 0; }
+.hero { font-size: var(--fs-hero); font-weight: var(--fw-bold); color: #FFFFFF; margin: 0; line-height: 1.15; }
+.hero .accent { color: var(--accent); }
+.subtitle { font-size: var(--fs-subtitle); color: var(--accent-2); margin: 10pt 0 0 0; line-height: 1.4; }
+.bottom { display: flex; justify-content: space-between; align-items: flex-end; }
+.bottom-label { font-size: var(--fs-source); color: var(--dim); letter-spacing: 1pt; margin: 0; }
+</style></head>
+<body>
+<div class="slide">
+  <div class="top">
+    <p class="label">VISUAL-DECK · MINIMAL EXAMPLE</p>
+    <p class="section-no">DEMO · 01</p>
+  </div>
+  <div>
+    <p class="prelude">HELLO · VISUAL DECK</p>
+    <p class="hero">它 <span class="accent">能跑</span> 起来。</p>
+    <p class="subtitle">HTML → PPTX pipeline · 两页最小可验证例子</p>
+  </div>
+  <div class="bottom">
+    <p class="bottom-label">visual-deck skill</p>
+    <p class="bottom-label">run: npm install && node build.js</p>
+  </div>
+</div>
+</body>
+</html>

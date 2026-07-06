@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<!--
+  slide-timeline.html · 水平时间轴 · 3~5 个节点横向排列
+
+  USE WHEN:
+    - 按时间展示：roadmap、季度规划、里程碑、历史进程
+    - 按阶段展示：Phase 1 → 2 → 3 的流程
+    - 节点数 3~5 个（少于 3 不值得用时间轴，多于 5 拥挤）
+
+  DO NOT USE WHEN:
+    - 非线性（网状 / 并发 / 循环） → 出一张自定义图（image prompt）
+    - 2 个阶段 → 用 2col "before / after"
+    - 单点强调 → 用 quote 或 r34
+
+  注意：节点数变化时调 --node-count；CSS grid 自适应。当前模板 4 节点。
+  主题变量取自 ../themes/*.css。
+-->
+<html lang="zh">
+<head><meta charset="UTF-8">
+<link rel="stylesheet" href="../themes/dark-coral.css">
+<style>
+html { background: var(--bg); }
+body {
+  width: var(--slide-w); height: var(--slide-h); margin: 0; padding: 0;
+  font-family: var(--font-sans); color: var(--fg); background: var(--bg);
+}
+.slide {
+  width: var(--slide-w); height: var(--slide-h);
+  padding: var(--pad-slide); box-sizing: border-box;
+  display: flex; flex-direction: column;
+}
+.eyebrow { font-weight: var(--fw-light); font-size: var(--fs-label); letter-spacing: 3pt; color: var(--accent); margin: 0 0 6pt 0; }
+.title { font-size: var(--fs-title); font-weight: var(--fw-bold); color: #FFFFFF; margin: 0 0 24pt 0; line-height: 1.2; }
+.title .accent { color: var(--accent); }
+
+.timeline { display: flex; flex-direction: column; flex: 1; justify-content: center; }
+.axis {
+  position: relative; height: 2pt; background: var(--dim); margin: 0 40pt;
+}
+.nodes { display: flex; flex-direction: row; justify-content: space-between; margin: -8pt 0 0 0; padding: 0 32pt; }
+.node {
+  display: flex; flex-direction: column; align-items: center; text-align: center; width: 140pt;
+}
+.dot { width: 14pt; height: 14pt; background: var(--accent); border: 3pt solid var(--bg); border-radius: 50%; }
+.year { font-size: 14pt; font-weight: var(--fw-bold); color: var(--accent-2); margin: 10pt 0 2pt 0; letter-spacing: 1pt; }
+.stage { font-size: 14pt; font-weight: var(--fw-bold); color: #FFFFFF; margin: 0 0 6pt 0; line-height: 1.3; }
+.detail { font-size: 10pt; color: var(--fg); margin: 0; line-height: 1.4; }
+
+.source { font-size: var(--fs-source); color: var(--faint); letter-spacing: 1pt; margin: 12pt 0 0 0; }
+</style></head>
+<body>
+<div class="slide">
+  <p class="eyebrow">SECTION · TIMELINE</p>
+  <h1 class="title">36 个月 <span class="accent">补考窗口</span></h1>
+
+  <div class="timeline">
+    <div class="axis"></div>
+    <div class="nodes">
+      <div class="node">
+        <div class="dot"></div>
+        <p class="year">2026</p>
+        <p class="stage">Phase 1</p>
+        <p class="detail">阶段一的关键事件或里程碑</p>
+      </div>
+      <div class="node">
+        <div class="dot"></div>
+        <p class="year">2027</p>
+        <p class="stage">Phase 2</p>
+        <p class="detail">阶段二的关键事件</p>
+      </div>
+      <div class="node">
+        <div class="dot"></div>
+        <p class="year">2028</p>
+        <p class="stage">Phase 3</p>
+        <p class="detail">阶段三的关键事件</p>
+      </div>
+      <div class="node">
+        <div class="dot"></div>
+        <p class="year">2029</p>
+        <p class="stage">Phase 4</p>
+        <p class="detail">阶段四：目标状态</p>
+      </div>
+    </div>
+  </div>
+
+  <p class="source">Source · 数据来源</p>
+</div>
+</body>
+</html>

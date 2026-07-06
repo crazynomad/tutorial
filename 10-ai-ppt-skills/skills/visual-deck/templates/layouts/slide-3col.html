@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<!--
+  slide-3col.html · 三栏并列 · 三等分
+
+  USE WHEN:
+    - 三元并列：三种客户 / 三条路径 / 过去-现在-未来
+    - 三栏分量相当，每栏 icon/数字 + title + 1~3 条要点
+    - "三段论" 式论证
+
+  DO NOT USE WHEN:
+    - 只有两项 → 用 2col（分量不被稀释）
+    - 四项及以上 → 拆两页，或用 stats 格子
+    - 三项有强弱顺序 → 用 timeline
+
+  主题变量取自 ../themes/*.css。
+-->
+<html lang="zh">
+<head><meta charset="UTF-8">
+<link rel="stylesheet" href="../themes/dark-coral.css">
+<style>
+html { background: var(--bg); }
+body {
+  width: var(--slide-w); height: var(--slide-h); margin: 0; padding: 0;
+  font-family: var(--font-sans); color: var(--fg); background: var(--bg);
+}
+.slide {
+  width: var(--slide-w); height: var(--slide-h);
+  padding: var(--pad-slide); box-sizing: border-box;
+  display: flex; flex-direction: column;
+}
+.eyebrow { font-weight: var(--fw-light); font-size: var(--fs-label); letter-spacing: 3pt; color: var(--accent); margin: 0 0 6pt 0; }
+.title { font-size: var(--fs-title); font-weight: var(--fw-bold); color: #FFFFFF; margin: 0 0 18pt 0; line-height: 1.2; }
+.title .accent { color: var(--accent); }
+
+.cols { display: flex; flex-direction: row; gap: 24pt; flex: 1; }
+.col { flex: 1; display: flex; flex-direction: column; padding: 14pt; box-sizing: border-box; background: var(--panel); }
+.col-badge { font-size: 28pt; font-weight: var(--fw-bold); color: var(--accent); margin: 0 0 6pt 0; line-height: 1; }
+.col-title { font-size: 16pt; font-weight: var(--fw-bold); color: #FFFFFF; margin: 0 0 8pt 0; line-height: 1.3; }
+.col-lede { font-size: 11pt; color: var(--accent-2); margin: 0 0 10pt 0; line-height: 1.4; }
+.col-bullets { list-style: none; padding: 0; margin: 0; }
+.col-bullets li { font-size: 11pt; color: var(--fg); margin: 0 0 5pt 0; padding-left: 12pt; position: relative; line-height: 1.4; }
+.col-bullets li::before { content: '—'; position: absolute; left: 0; color: var(--accent); }
+
+.source { font-size: var(--fs-source); color: var(--faint); letter-spacing: 1pt; margin: 12pt 0 0 0; }
+</style></head>
+<body>
+<div class="slide">
+  <p class="eyebrow">SECTION · THREE</p>
+  <h1 class="title">三种 <span class="accent">X</span>，三种打法</h1>
+
+  <div class="cols">
+    <div class="col">
+      <p class="col-badge">01</p>
+      <h2 class="col-title">类别 A</h2>
+      <p class="col-lede">一句概括</p>
+      <ul class="col-bullets">
+        <li>要点 1</li>
+        <li>要点 2</li>
+      </ul>
+    </div>
+    <div class="col">
+      <p class="col-badge">02</p>
+      <h2 class="col-title">类别 B</h2>
+      <p class="col-lede">一句概括</p>
+      <ul class="col-bullets">
+        <li>要点 1</li>
+        <li>要点 2</li>
+      </ul>
+    </div>
+    <div class="col">
+      <p class="col-badge">03</p>
+      <h2 class="col-title">类别 C</h2>
+      <p class="col-lede">一句概括</p>
+      <ul class="col-bullets">
+        <li>要点 1</li>
+        <li>要点 2</li>
+      </ul>
+    </div>
+  </div>
+
+  <p class="source">Source · 数据来源</p>
+</div>
+</body>
+</html>

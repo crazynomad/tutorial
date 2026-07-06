@@ -1,0 +1,52 @@
+/*
+ * dark-teal.css — 技术章节 / 冷静段落用
+ *
+ * 与 dark-coral 的唯一区别：--accent 是冷色 teal 而非暖色 coral。
+ * --accent-2 保留 warm gold 不变（对比色协调）。
+ *
+ * 适用：NVIDIA/算力/架构类技术解读章节，任何需要"冷静、理性、技术感"调性的 deck。
+ * 切换方式：在 slide HTML 的 <link> 里把 ../themes/dark-coral.css 改成 ../themes/dark-teal.css。
+ */
+
+:root {
+  /* ---- 色彩 ---- */
+  --bg:        #0A0A0A;
+  --fg:        #F5F2EB;
+  --muted:    #8A8A8A;
+  --dim:      #6B6B6B;
+  --faint:    #5A5A5A;
+  --accent:   #76C7C0;   /* cool teal */
+  --accent-2: #D4A574;   /* warm gold，保留 */
+  --panel:    #152525;   /* 配合 teal 的图位占位色 */
+
+  /* ---- 暗罩 ---- */
+  --scrim-base: rgba(10, 10, 10, 0.55);
+  --scrim-left: rgba(10, 10, 10, 0.35);
+  --scrim-heavy: rgba(10, 10, 10, 0.62);
+
+  /* ---- 字体 ---- */
+  --font-sans: "Microsoft YaHei", "微软雅黑", Helvetica, Arial, sans-serif;
+
+  /* ---- 字号 ---- */
+  --fs-hero:      60pt;
+  --fs-title:     32pt;
+  --fs-subtitle:  16pt;
+  --fs-lede:      14pt;
+  --fs-body:      12pt;
+  --fs-label:     9pt;
+  --fs-source:    8pt;
+
+  /* ---- 字重 ---- */
+  --fw-bold:   700;
+  --fw-normal: 400;
+  --fw-light:  300;
+
+  /* ---- 间距 ---- */
+  --pad-slide: 42pt 48pt 36pt 48pt;
+  --pad-r34:   42pt 320pt 36pt 48pt;
+  --pad-l34:   42pt 48pt 36pt 320pt;
+
+  --imgpane-w: 304pt;
+  --slide-w: 720pt;
+  --slide-h: 405pt;
+}
