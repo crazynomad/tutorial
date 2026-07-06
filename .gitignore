@@ -1,27 +1,64 @@
-# macOS
+# ── macOS ──
 .DS_Store
 ._*
 
-# Node / Remotion
+# ── Node / Remotion ──
 **/node_modules/
 **/out/
 **/remotion-*/
 !**/remotion-*/src/
 
-# AI coding assistants local settings
+# ── AI coding assistant local dirs ──
+# A multi-tool skills installer scatters symlink farms into the repo root.
+# .agents/ holds the real skill store; the rest are just symlinks. None are tracked.
+.adal/
+.agent/
+.agents/
+.augment/
 .claude/
+.cline/
+.codebuddy/
+.codex/
+.commandcode/
+.continue/
+.crush/
 .cursor/
+.factory/
+.gemini/
 .github/
+.goose/
+.junie/
+.kilocode/
+.kiro/
+.kode/
+.mcpjam/
+.mux/
+.neovate/
+.openclaude/
+.opencode/
+.openhands/
+.pi/
+.pochi/
+.qoder/
+.qwen/
+.roo/
+.trae/
+.vibe/
+.windsurf/
+.zencoder/
 
-# Production directories (not tracked)
-03-disk-cleaner/downloads/
-03-disk-cleaner/aigc/
-03-disk-cleaner/sample/
-03-disk-cleaner/capcut/
-03-disk-cleaner/recording/
-03-disk-cleaner/output/
+# ── Per-episode production / scratch dirs (applies to every NN-* episode) ──
+# These hold heavy source/render media. Track only the folder marker (.gitkeep),
+# never the contents. Add a `.gitkeep` file to keep an empty dir in git.
+**/downloads/**
+**/aigc/**
+**/sample/**
+**/capcut/**
+**/recording/**
+**/output/**
+!**/.gitkeep
 
-# Binary/media files
+# ── Binary / media (belt-and-suspenders — matches anywhere) ──
 *.mp4
 *.mov
 *.mp3
@@ -32,4 +69,6 @@
 *.jpeg
 *.png
 *.gif
+*.pdf
 *.screenflow/
+14-loop/tools/shots/
