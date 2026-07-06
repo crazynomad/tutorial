@@ -1,0 +1,326 @@
+<meta charset="utf-8">
+<title>Particle Sim — Baseline (unoptimized)</title>
+<!--
+  BASELINE build of a 2D elastic-collision particle sim.
+  This is a deliberately naive first draft — it works and the physics is correct
+  (energy is conserved), but it is SLOW. It is meant as the starting point for an
+  iterative performance-tuning loop: each pass should profile it, find a hotspot,
+  and push the frame rate back up toward 60.
+-->
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #05060a; overflow: hidden;
+    font: 12px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: #c9d4de; }
+  #app { display: flex; flex-direction: column; height: 100vh; }
+  #bar { flex: 0 0 auto; display: flex; align-items: center; gap: 26px;
+    padding: 10px 18px; border-bottom: 1px solid #14181f; background: #07090e; }
+  .title { color: #eef2f6; letter-spacing: .14em; text-transform: uppercase; font-size: 11px; }
+  .grp { display: flex; align-items: center; gap: 9px; }
+  label { color: #5f6f7e; text-transform: uppercase; font-size: 10px; letter-spacing: .1em; }
+  b { color: #eef2f6; font-weight: 600; }
+  input[type=range] { width: 240px; accent-color: #8fd0ff; }
+  button { background: #0d131a; color: #9fb0be; border: 1px solid #212a33; border-radius: 5px;
+    padding: 5px 13px; cursor: pointer; letter-spacing: .08em; text-transform: uppercase; font-size: 10px; }
+  button:hover { border-color: #4a5765; color: #eef2f6; }
+  #stage { flex: 1 1 auto; position: relative; min-height: 0; }
+  #cv { display: block; width: 100%; height: 100%; }
+  #hud { position: absolute; top: 16px; right: 20px; text-align: right; pointer-events: none; }
+  #fps { font-size: 52px; line-height: .9; font-weight: 700; color: #7ee787;
+    font-variant-numeric: tabular-nums; text-shadow: 0 0 20px rgba(126,231,135,.35); }
+  #fps.warn { color: #ffd166; text-shadow: 0 0 20px rgba(255,209,102,.35); }
+  #fps.bad  { color: #ff6b6b; text-shadow: 0 0 20px rgba(255,107,107,.35); }
+  #fps small { font-size: 15px; color: #5f6f7e; font-weight: 400; text-shadow: none; }
+  #sub { margin-top: 6px; color: #8b98a5; font-variant-numeric: tabular-nums; }
+  #target { margin-top: 2px; color: #45505c; font-size: 10px; letter-spacing: .06em; }
+</style>
+
+<div id="app">
+  <div id="bar">
+    <span class="title">Particle Sim · Baseline</span>
+    <div class="grp">
+      <label>Balls</label>
+      <input id="count" type="range" min="100" max="4000" step="100" value="1200">
+      <b id="countv">1200</b>
+    </div>
+    <div class="grp">
+      <button id="pause">Pause</button>
+      <button id="reset">Reset</button>
+    </div>
+    <span style="color:#45505c">naive O(N²) · glow render · single thread</span>
+  </div>
+  <div id="stage">
+    <canvas id="cv"></canvas>
+    <div id="hud">
+      <div id="fps"><span id="fpsnum">–</span><small> fps</small></div>
+      <div id="sub">– ms/frame</div>
+      <div id="target">target 60 fps</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById("cv");
+const ctx = canvas.getContext("2d");
+
+let COUNT = 1200, paused = false;
+let balls = [];
+
+// visual-effect knobs (all render-only — they do not touch the physics)
+const TRAIL_LEN = 8;      // how many past positions each ball remembers
+const LINK_DIST = 90;     // draw a line between any two balls closer than this
+
+function rand(a, b) { return a + Math.random() * (b - a); }
+
+// balls are plain objects in a plain array (array-of-structs)
+function makeBalls() {
+  const rect = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.round(rect.width * dpr);
+  canvas.height = Math.round(rect.height * dpr);
+  balls = [];
+  for (let i = 0; i < COUNT; i++) {
+    const r = rand(5, 11) * dpr;
+    balls.push({
+      x: rand(r, canvas.width - r),
+      y: rand(r, canvas.height - r),
+      vx: rand(-1.4, 1.4) * dpr,
+      vy: rand(-1.4, 1.4) * dpr,
+      r: r,
+      color: "hsl(" + Math.round(rand(180, 210)) + ", 70%, 75%)",
+      trail: [],                                     // remembered past positions
+    });
+  }
+}
+
+// move + wall bounce
+function integrate() {
+  const rect = canvas.getBoundingClientRect();       // read layout every frame
+  const W = canvas.width, H = canvas.height;
+  for (let i = 0; i < balls.length; i++) {
+    const b = balls[i];
+    b.x += b.vx;
+    b.y += b.vy;
+    if (b.x - b.r < 0) { b.x = b.r; b.vx = Math.abs(b.vx); }
+    if (b.x + b.r > W) { b.x = W - b.r; b.vx = -Math.abs(b.vx); }
+    if (b.y - b.r < 0) { b.y = b.r; b.vy = Math.abs(b.vy); }
+    if (b.y + b.r > H) { b.y = H - b.r; b.vy = -Math.abs(b.vy); }
+  }
+}
+
+// elastic collision between two balls (mass proportional to area)
+function collidePair(a, b) {
+  const normal = { x: b.x - a.x, y: b.y - a.y };     // allocate a vector each call
+  const dist = Math.hypot(normal.x, normal.y);       // sqrt every check
+  const minDist = a.r + b.r;
+  if (dist === 0 || dist >= minDist) return;
+  const n = { x: normal.x / dist, y: normal.y / dist };
+  const ma = a.r * a.r, mb = b.r * b.r;              // recompute mass every time
+  // positional correction
+  const overlap = minDist - dist;
+  const totalInvMass = 1 / ma + 1 / mb;
+  a.x -= n.x * overlap * (1 / ma) / totalInvMass;
+  a.y -= n.y * overlap * (1 / ma) / totalInvMass;
+  b.x += n.x * overlap * (1 / mb) / totalInvMass;
+  b.y += n.y * overlap * (1 / mb) / totalInvMass;
+  // relative velocity along the normal
+  const rel = { x: b.vx - a.vx, y: b.vy - a.vy };
+  const vn = rel.x * n.x + rel.y * n.y;
+  if (vn > 0) return;
+  const impulse = -(2 * vn) / totalInvMass;          // perfectly elastic (e = 1)
+  a.vx -= impulse * (1 / ma) * n.x;
+  a.vy -= impulse * (1 / ma) * n.y;
+  b.vx += impulse * (1 / mb) * n.x;
+  b.vy += impulse * (1 / mb) * n.y;
+}
+
+// check every ordered pair (yes, twice) — O(N²)
+function collideAll() {
+  for (let i = 0; i < balls.length; i++) {
+    for (let j = 0; j < balls.length; j++) {
+      if (i === j) continue;
+      collidePair(balls[i], balls[j]);
+    }
+  }
+}
+
+// record each ball's current position into its trail history
+function updateTrails() {
+  const dpr = window.devicePixelRatio || 1;
+  const maxLen = TRAIL_LEN;
+  for (let i = 0; i < balls.length; i++) {
+    const b = balls[i];
+    b.trail.push({ x: b.x, y: b.y });              // allocate a point every frame
+    while (b.trail.length > maxLen) b.trail.shift();
+  }
+}
+
+// --- pre-rendered glow sprite cache ---------------------------------------
+// The old draw() built two radial gradients AND enabled a 22px shadowBlur for
+// every ball, every frame. Gradient objects and shadow-blur are among the most
+// expensive things you can ask a 2D canvas to do; at 1200 balls that is ~2400
+// gradient allocations + 1200 blurred fills per frame — which is what pinned
+// the tab. Instead we rasterise the glow ONCE per colour into a small offscreen
+// canvas and just blit (drawImage) it, scaled, for each ball.
+const SPRITE_R = 64;             // halo radius of the baked texture, in px
+const spriteCache = new Map();   // color string -> offscreen canvas
+
+function getSprite(color) {
+  let c = spriteCache.get(color);
+  if (c) return c;
+  c = document.createElement("canvas");
+  c.width = c.height = SPRITE_R * 2;
+  const g = c.getContext("2d");
+  const cx = SPRITE_R, cy = SPRITE_R;
+  // soft outer halo (bakes in what shadowBlur used to add at runtime)
+  const halo = g.createRadialGradient(cx, cy, 0, cx, cy, SPRITE_R);
+  halo.addColorStop(0, color);
+  halo.addColorStop(1, "rgba(10,14,26,0)");
+  g.fillStyle = halo;
+  g.beginPath(); g.arc(cx, cy, SPRITE_R, 0, Math.PI * 2); g.fill();
+  // bright core (same 0 / .5 / 1 stops as the original, at r = R/2.4)
+  const coreR = SPRITE_R / 2.4;
+  const core = g.createRadialGradient(cx, cy, 0, cx, cy, coreR);
+  core.addColorStop(0, "#ffffff");
+  core.addColorStop(0.5, color);
+  core.addColorStop(1, "rgba(10,14,26,0)");
+  g.fillStyle = core;
+  g.beginPath(); g.arc(cx, cy, coreR, 0, Math.PI * 2); g.fill();
+  spriteCache.set(color, c);
+  return c;
+}
+
+// draw the whole scene: constellation links, trails, then glowing balls
+function draw() {
+  const dpr = window.devicePixelRatio || 1;
+  ctx.fillStyle = "#05060a";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // 1) constellation links — bucketed into a uniform grid so each ball is only
+  //    tested against neighbours in adjacent cells (near-linear) instead of the
+  //    old all-pairs O(N²) sqrt storm. Segments are batched into a few Path2D
+  //    objects (one per alpha band) and stroked in ~5 calls, not thousands.
+  drawLinks(LINK_DIST * dpr);
+
+  // 2) fading motion trails — a stroked polyline through each ball's history
+  for (let i = 0; i < balls.length; i++) {
+    const b = balls[i], t = b.trail;
+    for (let k = 1; k < t.length; k++) {
+      const alpha = (k / t.length) * 0.4;
+      ctx.strokeStyle = "rgba(180,220,255," + alpha.toFixed(3) + ")";
+      ctx.lineWidth = (b.r * (k / t.length));
+      ctx.beginPath();
+      ctx.moveTo(t[k - 1].x, t[k - 1].y);
+      ctx.lineTo(t[k].x, t[k].y);
+      ctx.stroke();
+    }
+  }
+
+  // 3) glowing balls — additive blit of the pre-baked sprite (no per-frame
+  //    gradients, no shadowBlur, no save/restore)
+  ctx.globalCompositeOperation = "lighter";
+  for (let i = 0; i < balls.length; i++) {
+    const b = balls[i];
+    const s = getSprite(b.color);
+    const d = b.r * 4.8;           // sprite halo spans 2.4·r in every direction
+    ctx.drawImage(s, b.x - b.r * 2.4, b.y - b.r * 2.4, d, d);
+  }
+  ctx.globalCompositeOperation = "source-over";
+}
+
+// spatial-grid constellation links (replaces the O(N²) hypot + per-pair stroke)
+const _grid = [];   // reused cell buckets, rebuilt each frame
+function drawLinks(linkDist) {
+  const W = canvas.width, H = canvas.height;
+  const cell = linkDist || 1;
+  const cols = Math.max(1, Math.ceil(W / cell));
+  const rows = Math.max(1, Math.ceil(H / cell));
+  const n = cols * rows;
+  for (let i = 0; i < n; i++) { if (_grid[i]) _grid[i].length = 0; else _grid[i] = []; }
+  _grid.length = n;
+  for (let i = 0; i < balls.length; i++) {
+    const b = balls[i];
+    let cx = (b.x / cell) | 0, cy = (b.y / cell) | 0;
+    if (cx < 0) cx = 0; else if (cx >= cols) cx = cols - 1;
+    if (cy < 0) cy = 0; else if (cy >= rows) cy = rows - 1;
+    _grid[cy * cols + cx].push(b);
+  }
+
+  const BUCKETS = 5;
+  const paths = [];
+  for (let k = 0; k < BUCKETS; k++) paths.push(new Path2D());
+  const linkDist2 = linkDist * linkDist;
+  for (let cy = 0; cy < rows; cy++) {
+    for (let cx = 0; cx < cols; cx++) {
+      const home = _grid[cy * cols + cx];
+      if (!home.length) continue;
+      // self + E, SW, S, SE neighbours → every near pair counted exactly once
+      for (let dy = 0; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          if (dy === 0 && dx < 0) continue;
+          const nx = cx + dx, ny = cy + dy;
+          if (nx < 0 || nx >= cols || ny >= rows) continue;
+          const other = _grid[ny * cols + nx];
+          const same = dx === 0 && dy === 0;
+          for (let a = 0; a < home.length; a++) {
+            const ba = home[a];
+            for (let bi = same ? a + 1 : 0; bi < other.length; bi++) {
+              const bb = other[bi];
+              const ex = bb.x - ba.x, ey = bb.y - ba.y;
+              const d2 = ex * ex + ey * ey;        // squared dist — skip sqrt
+              if (d2 >= linkDist2) continue;
+              const alpha = 1 - Math.sqrt(d2) / linkDist;
+              let k = (alpha * BUCKETS) | 0; if (k >= BUCKETS) k = BUCKETS - 1;
+              paths[k].moveTo(ba.x, ba.y);
+              paths[k].lineTo(bb.x, bb.y);
+            }
+          }
+        }
+      }
+    }
+  }
+  ctx.lineWidth = 1 * (window.devicePixelRatio || 1);
+  for (let k = 0; k < BUCKETS; k++) {
+    const mid = (k + 0.5) / BUCKETS;               // representative band alpha
+    ctx.strokeStyle = "rgba(140,205,255," + (mid * 0.5).toFixed(3) + ")";
+    ctx.stroke(paths[k]);
+  }
+}
+
+// --- fps meter + main loop ---
+let frames = 0, acc = 0, prev = performance.now(), lastMs = 0;
+function loop(now) {
+  const dt = now - prev; prev = now;
+  const t0 = performance.now();
+  if (!paused) {
+    integrate();
+    collideAll();
+    updateTrails();
+    draw();
+  }
+  lastMs = lastMs * 0.9 + (performance.now() - t0) * 0.1;
+
+  frames++; acc += dt;
+  if (acc >= 400) {
+    const fps = Math.round(frames * 1000 / acc);
+    document.getElementById("fpsnum").textContent = fps;
+    document.getElementById("fps").className = fps >= 55 ? "" : fps >= 30 ? "warn" : "bad";
+    document.getElementById("sub").textContent = lastMs.toFixed(1) + " ms/frame · " + balls.length + " balls";
+    frames = 0; acc = 0;
+  }
+  requestAnimationFrame(loop);
+}
+
+makeBalls();
+requestAnimationFrame(loop);
+
+// --- controls ---
+document.getElementById("count").addEventListener("input", e => {
+  COUNT = +e.target.value; document.getElementById("countv").textContent = COUNT; makeBalls();
+});
+document.getElementById("pause").addEventListener("click", e => {
+  paused = !paused; e.target.textContent = paused ? "Resume" : "Pause";
+});
+document.getElementById("reset").addEventListener("click", makeBalls);
+let rz; addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(makeBalls, 150); });
+</script>

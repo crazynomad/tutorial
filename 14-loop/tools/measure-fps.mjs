@@ -23,10 +23,14 @@ const VIEWPORT = { width: 1600, height: 900 };
 const DSF = 2;               // retina 口径,锁死:不许降
 const WARMUP_MS = 5000;
 const SAMPLE_MS = 15000;
-const TARGET_FPS = 59;       // rAF 在 60Hz 封顶 60,59 防抖动误杀
+const TARGET_MS = 4.0;       // 每帧计算预算(vsync 已解除,帧间隔=真实每帧成本)
 const MIN_CANVAS_W = Math.floor(VIEWPORT.width * DSF * 0.9);   // 画布缩水即作弊
 
-const browser = await chromium.launch({ headless: false });
+// 解除 60Hz 封顶:rAF 全速运行,帧率不再有天花板,指标才有分辨力
+const browser = await chromium.launch({
+  headless: false,
+  args: ['--disable-frame-rate-limit', '--disable-gpu-vsync'],
+});
 const page = await browser.newPage({ viewport: VIEWPORT, deviceScaleFactor: DSF });
 await page.goto(pathToFileURL(target).href);
 await page.waitForTimeout(500);
@@ -67,6 +71,7 @@ const env = await page.evaluate(() => ({
 }));
 
 const total = frames.reduce((a, b) => a + b, 0);
+const avg_ms = +(total / frames.length).toFixed(2);
 const avg_fps = +(frames.length * 1000 / total).toFixed(1);
 const sorted = [...frames].sort((a, b) => b - a);
 const worst1pc = sorted.slice(0, Math.max(1, Math.floor(sorted.length / 100)));
@@ -79,21 +84,22 @@ await browser.close();
 
 const particles_locked = countBefore === PARTICLES && countMid === PARTICLES && countAfter === PARTICLES;
 const canvas_ok = env.canvas_w >= MIN_CANVAS_W && env.dpr >= DSF;
-const pass = particles_locked && canvas_ok && avg_fps >= TARGET_FPS;
+const pass = particles_locked && canvas_ok && avg_ms <= TARGET_MS;
 
 const result = {
   page: target.split('/').pop(),
   particles: countMid,
   particles_locked,
+  avg_ms,
   avg_fps,
   p1_low_fps,
   frames_sampled: frames.length,
   canvas: `${env.canvas_w}x${env.canvas_h}@dpr${env.dpr}`,
   canvas_ok,
-  target: `avg_fps>=${TARGET_FPS} @ ${PARTICLES} particles`,
+  target: `avg_ms<=${TARGET_MS} @ ${PARTICLES} particles (unthrottled)`,
   screenshot: shot,
   pass,
 };
 console.log(JSON.stringify(result));
-console.log(`\n${pass ? '✅ PASS' : '❌ FAIL'} · ${countMid} particles · avg ${avg_fps} fps · 1% low ${p1_low_fps} fps · ${env.canvas_w}x${env.canvas_h}@${env.dpr}x`);
+console.log(`\n${pass ? '✅ PASS' : '❌ FAIL'} · ${countMid} particles · avg ${avg_ms} ms/frame (${avg_fps} fps unthrottled) · 1% low ${p1_low_fps} fps · ${env.canvas_w}x${env.canvas_h}@${env.dpr}x`);
 process.exit(pass ? 0 : 1);
